@@ -3,6 +3,7 @@ package com.library.auth_service.dtos.requests;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
 import java.util.List;
@@ -21,5 +22,6 @@ public class UserRequest {
     Date created_at;
     Date updated_at;
     String password;
+    MultipartFile multipartFile;
     List<RoleRequest> roles;
 }

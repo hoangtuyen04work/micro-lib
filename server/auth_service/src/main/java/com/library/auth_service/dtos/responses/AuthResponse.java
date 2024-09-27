@@ -17,6 +17,7 @@ public class AuthResponse {
     Long id;
     String email;
     String phone;
+    String imageUrl;
     String token;
     String refreshToken;
 }

@@ -6,6 +6,7 @@ import com.library.auth_service.entities.User;
 import com.library.auth_service.exceptions.AppException;
 import com.library.auth_service.exceptions.ErrorCode;
 import com.library.auth_service.repositories.UserRepo;
+import com.library.auth_service.repositories.httpclient.AmazonS3Client;
 import com.library.auth_service.services.UserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ public class UserServiceImpl implements UserService {
     UserRepo userRepo;
     RoleServiceImpl roleServiceImpl;
     PasswordEncoder passwordEncoder;
+    AmazonS3Client amazonS3Client;
 
     @Override
     public User emailVerify(String email, String password) throws AppException {
@@ -82,7 +84,9 @@ public class UserServiceImpl implements UserService {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
         User user = toUser(request);
+        String urlImage = amazonS3Client.uploadImage(request.getMultipartFile());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setImageUrl(urlImage);
         return userRepo.save(user);
     }
     @Override
@@ -92,6 +96,7 @@ public class UserServiceImpl implements UserService {
                 .email(user.getEmail())
                 .name(user.getName())
                 .phone(user.getPhone())
+                .imageUrl(user.getImageUrl())
                 .created_at(user.getCreated_ad())
                 .updated_at(user.getUpdate_at())
                 .roles(roleServiceImpl.toRoleResponses(user.getRoles()))

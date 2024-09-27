@@ -32,4 +32,5 @@ public class User {
     Date update_at;
     @ManyToMany
     List<Role> roles;
+    String imageUrl;
 }

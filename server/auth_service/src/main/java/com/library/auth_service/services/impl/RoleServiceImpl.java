@@ -13,19 +13,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RoleServiceImpl implements RoleService {
     RoleRepo roleRepo;
+
     @Override
     public Role getRole(String roleName) {
         return roleRepo.findByRoleName(roleName);
     }
-
     @Override
     public Role createRole(Role role) {
-        return null;
+        return roleRepo.save(role);
     }
     @Override
     public List<Role> getAllRoles() {

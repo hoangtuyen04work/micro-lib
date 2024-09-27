@@ -20,5 +20,6 @@ public class UserResponse {
     String phone;
     Date created_at;
     Date updated_at;
+    String imageUrl;
     List<RoleResponse> roles;
 }
