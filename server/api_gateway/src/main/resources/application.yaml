@@ -1,0 +1,48 @@
+server:
+  port: 8888
+
+app:
+  api-prefix: /lib
+
+spring:
+  application:
+    name: api_gateway
+  cloud:
+    gateway:
+      routes:
+        - id: auth_service
+          uri: http://localhost:8080
+          predicates:
+            - Path=${app.api-prefix}/auth/**
+          filters:
+            - StripPrefix=1
+        - id: book_service
+          uri: http://localhost:8081
+          predicates:
+            - Path=${app.api-prefix}/book/**
+          filters:
+            - StripPrefix=1
+        - id: borrow_service
+          uri: http://localhost:8082
+          predicates:
+            - Path=${app.api-prefix}/borrow/**
+          filters:
+            - StripPrefix=1
+        - id: comment_service
+          uri: http://localhost:8083
+          predicates:
+            - Path=${app.api-prefix}/comment/**
+          filters:
+            - StripPrefix=1
+        - id: message_service
+          uri: http://localhost:8084
+          predicates:
+            - Path=${app.api-prefix}
+          filters:
+            - StripPrefix=1
+        - id: rate_service
+          uri: http://localhost:8085
+          predicates:
+            - Path=${app.api-prefix}/rate/**
+          filters:
+            -StripPrefix=1
