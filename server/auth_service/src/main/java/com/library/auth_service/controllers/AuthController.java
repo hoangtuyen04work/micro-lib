@@ -35,7 +35,7 @@ public class AuthController {
                 .build();
     }
     @PostMapping("/signup")
-    public ApiResponse<AuthResponse> signup(@RequestBody UserRequest request) throws AppException, JOSEException {
+    public ApiResponse<AuthResponse> signup(@ModelAttribute UserRequest request) throws AppException, JOSEException {
         return ApiResponse.<AuthResponse>builder()
                 .data(tokenServiceImpl.signup(request))
                 .build();
