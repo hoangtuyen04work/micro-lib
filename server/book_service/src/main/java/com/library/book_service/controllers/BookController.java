@@ -11,11 +11,44 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
+@RequestMapping("/book")
 public class BookController {
     BookService bookService;
+
+    @PutMapping("/return")
+    public ApiResponse<Boolean> returnBook(@RequestBody List<Long> bookIds){
+        bookService.returnBook(bookIds);
+        return ApiResponse.<Boolean>builder()
+                .data(true)
+                .build();
+    }
+
+    @PostMapping("/number")
+    public ApiResponse<List<Long>> newBook(@RequestBody List<Long> ids) throws AppException, JsonProcessingException {
+        return ApiResponse.<List<Long>>builder()
+                .data(bookService.getNumbers(ids))
+                .build();
+    }
+
+    @PostMapping("/borrow")
+    public ApiResponse<Boolean> borrow(@RequestBody List<Long> id){
+        bookService.borrow(id);
+        return ApiResponse.<Boolean>builder()
+                .data(true)
+                .build();
+    }
+
+    @GetMapping("/number/{id}")
+    public ApiResponse<Long> getNumberById(@PathVariable Long id) throws JsonProcessingException {
+        return ApiResponse.<Long>builder()
+                .data(bookService.getNumberById(id))
+                .build();
+    }
 
     @PostMapping("/create")
     public ApiResponse<BookResponse> createBook(@RequestBody NewBookRequest request) {

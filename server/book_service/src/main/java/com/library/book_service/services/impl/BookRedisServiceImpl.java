@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.library.book_service.dtos.responses.BookResponse;
-import com.library.book_service.dtos.responses.PageResponse;
 import com.library.book_service.services.BookRedisService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +19,46 @@ import java.util.List;
 public class BookRedisServiceImpl implements BookRedisService {
     RedisTemplate<String, Object> redisTemplate;
     ObjectMapper objectMapper;
+
+    @Override
+    public List<Long> getNumbers(List<Long> ids) throws JsonProcessingException {
+        StringBuilder key = new StringBuilder("get_numbers");
+        for(Long id : ids){
+            key.append(id);
+        }
+        String json = (String)redisTemplate.opsForValue().get(key);
+        return json == null ?
+                null
+                :
+                objectMapper.readValue(json, new TypeReference<List<Long>>() {});
+    }
+
+    @Override
+    public void saveGetNumbers(List<Long> ids,List<Long> numbers) throws JsonProcessingException {
+        StringBuilder key = new StringBuilder("get_numbers");
+        for(Long id : ids){
+            key.append(id);
+        }
+        String json = objectMapper.writeValueAsString(numbers);
+        redisTemplate.opsForValue().set(String.valueOf(key), json);
+    }
+
+    @Override
+    public Long getNumberById(Long id) throws JsonProcessingException {
+        String key = "get_number:" + id;
+        String json = (String)redisTemplate.opsForValue().get(key);
+        return json == null ?
+                null
+                :
+                objectMapper.readValue(json, new TypeReference<Long>() {});
+    }
+
+    @Override
+    public void saveGetNumberById(Long id,Long number) throws JsonProcessingException {
+        String key = "get_book:" + id;
+        String json = objectMapper.writeValueAsString(number);
+        redisTemplate.opsForValue().set(key, json);
+    }
 
     @Override
     public BookResponse get(Long id) throws JsonProcessingException {

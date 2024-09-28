@@ -26,5 +26,6 @@ public class BookRequest {
     String author;
     String imageUrl;
     String language;
+    Long number;
     List<CategoryRequest> categories;
 }

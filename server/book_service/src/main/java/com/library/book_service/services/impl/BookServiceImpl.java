@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -28,6 +29,58 @@ public class BookServiceImpl implements BookService{
     CategoryServiceImpl categoryService;
     AmazonS3Client amazonS3Client;
     BookRedisService bookRedisService;
+
+    @Override
+    public Boolean returnBook(List<Long> bookIds){
+        for(Long id : bookIds){
+            returnBook(id);
+        }
+        return true;
+    }
+
+    @Override
+    public void returnBook(Long id){
+        Book book = bookRepo.findById(id).get();
+        book.setNumber(book.getNumber() + 1);
+        bookRepo.save(book);
+    }
+
+    @Override
+    public Boolean borrow(List<Long> ids){
+        for(Long id : ids){
+            borrow(id);
+        }
+        return true;
+    }
+
+    @Override
+    public void borrow(Long id){
+        Book book = bookRepo.findById(id).get();
+        book.setNumber(book.getNumber() - 1);
+        bookRepo.save(book);
+    }
+
+    @Override
+    public List<Long> getNumbers(List<Long> ids) throws JsonProcessingException {
+        if(bookRedisService.getNumbers(ids) != null){
+            return bookRedisService.getNumbers(ids);
+        }
+        List<Book> books = bookRepo.findAll(ids);
+        List<Long> id = new ArrayList<>();
+        for (Book book : books) id.add(book.getId());
+        bookRedisService.saveGetNumbers(ids, id);
+        return id;
+    }
+
+    @Override
+    public Long getNumberById(Long id) throws JsonProcessingException {
+        if(bookRedisService.getNumberById(id) != null){
+            return bookRedisService.getNumberById(id);
+        }
+        Long number = bookRepo.findById(id).get().getNumber();
+        bookRedisService.saveGetNumberById(id, number);
+        return number;
+    }
 
     @Override
     public List<BookResponse> getById(List<Long> id) throws JsonProcessingException, AppException {
@@ -66,6 +119,7 @@ public class BookServiceImpl implements BookService{
         book.setEdition(updated.getEdition());
         book.setNumberPage(updated.getNumberPage());
         book.setName(updated.getName());
+        book.setNumber(updated.getNumber());
         book.setPrice(updated.getPrice());
         book.setPublicationDate(updated.getPublicationDate());
         book.setShortDescription(updated.getShortDescription());
@@ -97,6 +151,7 @@ public class BookServiceImpl implements BookService{
     @Override
     public Book toBook(NewBookRequest request){
         return Book.builder()
+                .number(request.getNumber())
                 .id(request.getId())
                 .bookCode(request.getBookCode())
                 .name(request.getName())
@@ -118,6 +173,7 @@ public class BookServiceImpl implements BookService{
                 .bookCode(request.getBookCode())
                 .name(request.getName())
                 .author(request.getAuthor())
+                .number(request.getNumber())
                 .categories(categoryService.toCategories(request.getCategories()))
                 .imageUrl(request.getImageUrl())
                 .price(request.getPrice())
@@ -135,6 +191,7 @@ public class BookServiceImpl implements BookService{
                 .id(request.getId())
                 .bookCode(request.getBookCode())
                 .name(request.getName())
+                .number(request.getNumber())
                 .author(request.getAuthor())
                 .categories(categoryService.toCategoryResponses(request.getCategories()))
                 .price(request.getPrice())

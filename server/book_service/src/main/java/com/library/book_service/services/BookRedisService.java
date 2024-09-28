@@ -8,6 +8,14 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface BookRedisService {
+    void saveGetNumbers(List<Long> ids, List<Long> numbers) throws JsonProcessingException;
+
+    Long getNumberById(Long id) throws JsonProcessingException;
+
+    List<Long> getNumbers(List<Long> ids) throws JsonProcessingException;
+
+    void saveGetNumberById(Long id, Long number) throws JsonProcessingException;
+
     BookResponse get(Long id) throws JsonProcessingException;
 
     void saveGetBook(Long id, BookResponse response) throws JsonProcessingException;

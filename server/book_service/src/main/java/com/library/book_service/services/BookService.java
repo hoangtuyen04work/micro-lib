@@ -12,6 +12,18 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface BookService {
+    Boolean returnBook(List<Long> bookIds);
+
+    void returnBook(Long id);
+
+    Boolean borrow(List<Long> ids);
+
+    void borrow(Long id) throws AppException, JsonProcessingException;
+
+    List<Long> getNumbers(List<Long> ids) throws JsonProcessingException;
+
+    Long getNumberById(Long id) throws JsonProcessingException;
+
     List<BookResponse> getById(List<Long> id) throws JsonProcessingException, AppException;
 
     BookResponse getById(Long id) throws JsonProcessingException, AppException;

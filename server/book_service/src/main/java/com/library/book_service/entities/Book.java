@@ -13,6 +13,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
+@EntityListeners(BookListener.class)
 public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,6 +26,7 @@ public class Book {
     String shortDescription;
     Long price;
     String author;
+    Long number;
     String imageUrl;
     String language;
     @ManyToMany()

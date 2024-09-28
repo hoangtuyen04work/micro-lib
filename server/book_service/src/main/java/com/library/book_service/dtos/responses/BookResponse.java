@@ -12,6 +12,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 public class BookResponse {
+    Long number;
     Long id;
     String bookCode;
     String name;
