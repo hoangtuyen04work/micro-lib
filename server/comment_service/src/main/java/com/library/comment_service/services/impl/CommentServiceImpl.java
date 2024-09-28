@@ -4,6 +4,8 @@ package com.library.comment_service.services.impl;
 import com.library.comment_service.dtos.requests.CommentRequest;
 import com.library.comment_service.dtos.responses.CommentResponse;
 import com.library.comment_service.entities.Comment;
+import com.library.comment_service.exceptions.AppException;
+import com.library.comment_service.exceptions.ErrorCode;
 import com.library.comment_service.repositories.CommentRepo;
 import com.library.comment_service.services.CommentService;
 import jakarta.transaction.Transactional;
@@ -34,8 +36,8 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
-    public CommentResponse updateComment(Long id, CommentRequest request) {
-        Comment comment = commentRepo.findById(id).orElseThrow(() -> new RuntimeException("Comment not found"));
+    public CommentResponse updateComment(Long id, CommentRequest request) throws AppException {
+        Comment comment = commentRepo.findById(id).orElseThrow(() -> new AppException(ErrorCode.COMMENT_NOT_EXISTED));
         comment.setContent(request.getContent());
         return toCommentResponse(commentRepo.save(comment));
     }

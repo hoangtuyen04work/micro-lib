@@ -4,6 +4,7 @@ package com.library.comment_service.controllers;
 import com.library.comment_service.dtos.ApiResponse;
 import com.library.comment_service.dtos.requests.CommentRequest;
 import com.library.comment_service.dtos.responses.CommentResponse;
+import com.library.comment_service.exceptions.AppException;
 import com.library.comment_service.services.CommentService;
 import jakarta.persistence.Access;
 import lombok.AccessLevel;
@@ -27,7 +28,7 @@ public class CommentController {
     }
 
     @PutMapping("/{id}")
-    public ApiResponse<CommentResponse> updateComment(@PathVariable Long id, @RequestBody CommentRequest request) {
+    public ApiResponse<CommentResponse> updateComment(@PathVariable Long id, @RequestBody CommentRequest request) throws AppException {
         return ApiResponse.<CommentResponse>builder()
                 .data(commentService.updateComment(id, request))
                 .build();
