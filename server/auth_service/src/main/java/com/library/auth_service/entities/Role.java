@@ -9,14 +9,15 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-@RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@NoArgsConstructor // Required for JPA
+@AllArgsConstructor // This generates a constructor with all fields
 @Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
     String roleName;
-    @ManyToMany
+    @ManyToMany(mappedBy = "roles")
     List<User> users;
 }

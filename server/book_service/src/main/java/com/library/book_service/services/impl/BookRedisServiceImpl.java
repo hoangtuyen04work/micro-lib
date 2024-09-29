@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.library.book_service.dtos.responses.BookResponse;
+import com.library.book_service.dtos.responses.PageResponse;
 import com.library.book_service.services.BookRedisService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,24 @@ import java.util.List;
 public class BookRedisServiceImpl implements BookRedisService {
     RedisTemplate<String, Object> redisTemplate;
     ObjectMapper objectMapper;
+
+    @Override
+    public PageResponse<BookResponse> search(String name, Long size, Long page) throws JsonProcessingException {
+        String key = new String("search_book:" + name + size + page);
+
+        String json = (String)redisTemplate.opsForValue().get(key);
+        return json == null ?
+                null
+                :
+                objectMapper.readValue(json, new TypeReference<PageResponse<BookResponse>>() {});
+    }
+
+    @Override
+    public void saveSearch(String name, Long size, Long page, PageResponse<BookResponse> response) throws JsonProcessingException {
+        StringBuilder key = new StringBuilder("search_book" + name + size + page);
+        String json = objectMapper.writeValueAsString(response);
+        redisTemplate.opsForValue().set(String.valueOf(key), json);
+    }
 
     @Override
     public List<Long> getNumbers(List<Long> ids) throws JsonProcessingException {

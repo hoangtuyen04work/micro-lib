@@ -11,6 +11,7 @@
         <option value="$PROJECT_DIR$/server/comment_service/pom.xml" />
         <option value="$PROJECT_DIR$/server/message_service/pom.xml" />
         <option value="$PROJECT_DIR$/server/rate_service/pom.xml" />
+        <option value="$PROJECT_DIR$/server/search_service/pom.xml" />
       </list>
     </option>
   </component>

@@ -13,6 +13,7 @@
         <module name="rate_service" />
         <module name="borrow_service" />
         <module name="book_service" />
+        <module name="search_service" />
       </profile>
     </annotationProcessing>
   </component>
@@ -25,6 +26,7 @@
       <module name="comment_service" options="-parameters" />
       <module name="message_service" options="-parameters" />
       <module name="rate_service" options="-parameters" />
+      <module name="search_service" options="-parameters" />
     </option>
   </component>
 </project>

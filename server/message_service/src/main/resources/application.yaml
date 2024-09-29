@@ -1,0 +1,16 @@
+server:
+  port: 8086
+  servlet:
+    context-path: /search
+spring:
+  application:
+    name: search_service
+  datasource:
+    url: "jdbc:mysql://localhost:3306/search-lib?useSSL=false"
+    username: root
+    password: 12345678
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+

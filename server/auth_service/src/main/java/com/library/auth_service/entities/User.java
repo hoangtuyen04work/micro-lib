@@ -1,9 +1,9 @@
 package com.library.auth_service.entities;
 
+
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.hibernate.annotations.Fetch;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 
@@ -13,16 +13,17 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
-@RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@NoArgsConstructor // Required for JPA
+@AllArgsConstructor // This generates a constructor with all fields
 @Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    @Column(nullable = false, unique = true, length = 64)
+    @Column(nullable = false, unique = true)
     String name;
-    @Column(nullable = false, length = 64)
+    @Column(nullable = false)
     String password;
     String email;
     String phone;
@@ -31,6 +32,12 @@ public class User {
     @LastModifiedDate
     Date update_at;
     @ManyToMany
+    @JoinTable(
+            name = "user_roles", // Join table name
+            joinColumns = @JoinColumn(name = "user_id"), // User's foreign key
+            inverseJoinColumns = @JoinColumn(name = "role_id") // Role's foreign key
+    )
     List<Role> roles;
+
     String imageUrl;
 }

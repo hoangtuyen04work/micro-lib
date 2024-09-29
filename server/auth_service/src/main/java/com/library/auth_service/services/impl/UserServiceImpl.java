@@ -74,7 +74,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User createUser(UserRequest request) throws AppException {
-        if(request.getEmail() == null || request.getPhone() == null){
+        if(request.getEmail() == null && request.getPhone() == null){
             throw new AppException(ErrorCode.INVALID_INPUT);
         }
         else if(userRepo.existsByEmail(request.getEmail())){

@@ -8,5 +8,6 @@
     <file url="file://$PROJECT_DIR$/server/comment_service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/server/message_service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/server/rate_service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/server/search_service/src/main/java" charset="UTF-8" />
   </component>
 </project>

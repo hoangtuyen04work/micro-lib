@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.library.book_service.dtos.requests.BookRequest;
 import com.library.book_service.dtos.requests.NewBookRequest;
 import com.library.book_service.dtos.responses.BookResponse;
+import com.library.book_service.dtos.responses.PageResponse;
 import com.library.book_service.entities.Book;
 import com.library.book_service.exceptions.AppException;
 import com.library.book_service.exceptions.ErrorCode;
@@ -14,6 +15,9 @@ import com.library.book_service.services.BookService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -29,6 +33,19 @@ public class BookServiceImpl implements BookService{
     CategoryServiceImpl categoryService;
     AmazonS3Client amazonS3Client;
     BookRedisService bookRedisService;
+
+    @Override
+    public PageResponse<BookResponse> search(String name, Long size, Long page){
+        Pageable pageable = PageRequest.of(Math.toIntExact(size), Math.toIntExact(page));
+        Page<Book> books = bookRepo.searchBookBy(name, pageable);
+        return PageResponse.<BookResponse>builder()
+                .totalPages(books.getTotalPages())
+                .content(toBookResponses(books.getContent()))
+                .pageSize(books.getSize())
+                .totalElements(books.getTotalElements())
+                .pageNumber(books.getNumber())
+                .build();
+    }
 
     @Override
     public Boolean returnBook(List<Long> bookIds){

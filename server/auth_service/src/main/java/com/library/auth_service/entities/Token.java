@@ -10,9 +10,10 @@ import java.util.Date;
 @Entity
 @Getter
 @Setter
-@RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@NoArgsConstructor // Required for JPA
+@AllArgsConstructor // This generates a constructor with all fields
 @Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class Token {
     @Id
     String token;

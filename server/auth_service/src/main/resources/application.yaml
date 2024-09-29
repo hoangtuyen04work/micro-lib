@@ -9,7 +9,7 @@ spring:
   application:
     name: auth_service
   datasource:
-    url: "jdbc:mysql://localhost:3306/auth-lib?useSSL=false"
+    url: "jdbc:mysql://localhost:3306/auth_lib?useSSL=false"
     username: root
     password: 12345678
   jpa:
