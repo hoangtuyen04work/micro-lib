@@ -40,7 +40,7 @@ public class AuthController {
                 .data(tokenServiceImpl.signup(request))
                 .build();
     }
-    @DeleteMapping("/logout")
+    @PostMapping("/logoutt")
     public void logout(@RequestBody TokenRequest request){
         tokenServiceImpl.logout(request);
     }

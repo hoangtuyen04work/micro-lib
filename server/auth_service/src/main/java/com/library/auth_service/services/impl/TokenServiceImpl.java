@@ -18,6 +18,7 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -43,6 +44,7 @@ public class TokenServiceImpl implements TokenService {
     String signerKey;
 
     @Override
+    @Transactional
     public void logout(TokenRequest request){
         tokenRepo.deleteByToken(request.getToken());
     }
@@ -77,14 +79,15 @@ public class TokenServiceImpl implements TokenService {
                 .token(token.getToken())
                 .phone(user.getPhone())
                 .email(user.getEmail())
+                .name(user.getName())
                 .refreshToken(token.getRefreshToken())
                 .build();
     }
 
     @Override
     public BooleanResponse authenticate(AuthRequest authRequest) throws AppException {
-        if(tokenRepo.existsByRefreshToken(authRequest.getRefreshToken()) || !tokenRepo.existsByToken(authRequest.getToken())){
-            throw  new AppException(ErrorCode.INVALID_INPUT);
+        if(!tokenRepo.existsByRefreshToken(authRequest.getRefreshToken()) || !tokenRepo.existsByToken(authRequest.getToken())){
+            throw  new AppException(ErrorCode.TOKEN_INVALID);
         }
         return BooleanResponse.builder()
                 .isValid(verifyToken(authRequest.getToken()))

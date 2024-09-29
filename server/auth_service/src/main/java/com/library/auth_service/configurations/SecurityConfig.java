@@ -26,7 +26,7 @@ import javax.crypto.spec.SecretKeySpec;
 @EnableMethodSecurity
 @EnableJpaAuditing
 public class SecurityConfig {
-    private final static String[] publicUrl = {"/signup/**", "/login/**", "/logout", "/authenticate", "/login/google"} ;
+    private final static String[] publicUrl = {"/signup/**", "/login/**", "/logoutt", "/authenticate", "/login/google"} ;
     @Value("${jwt.signerKey}")
     private String signerKey;
     @Autowired

@@ -44,6 +44,7 @@ public class ApplicationInitConfig {
                 User user = User.builder()
                         .roles(roles)
                         .name("ADMIN")
+                        .email("ADMIN")
                         .password(passwordEncoder.encode("123"))
                         .phone("ADMIN")
                         .build();

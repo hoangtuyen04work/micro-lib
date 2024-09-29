@@ -1,5 +1,6 @@
 package com.library.auth_service.services.impl;
 
+import com.library.auth_service.dtos.requests.RoleRequest;
 import com.library.auth_service.dtos.requests.UserRequest;
 import com.library.auth_service.dtos.responses.UserResponse;
 import com.library.auth_service.entities.User;
@@ -14,6 +15,8 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE,  makeFinal = true)
@@ -27,7 +30,7 @@ public class UserServiceImpl implements UserService {
     public User emailVerify(String email, String password) throws AppException {
         if(!isExistByEmail(email)) throw new AppException(ErrorCode.USER_NOT_EXISTED);
         User user = findByEmail(email);
-        if(passwordEncoder.matches(user.getPassword(), password)){
+        if(passwordEncoder.matches(password, user.getPassword())){
             return user;
         }
         else{
@@ -39,7 +42,7 @@ public class UserServiceImpl implements UserService {
     public User phoneVerify(String phone, String password) throws AppException {
         if(!isExistByPhone(phone)) throw new AppException(ErrorCode.USER_NOT_EXISTED);
         User user = findByPhone(phone);
-        if(passwordEncoder.matches(user.getPassword(), password)){
+        if(passwordEncoder.matches(password, user.getPassword())){
             return user;
         }
         else{
@@ -74,19 +77,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User createUser(UserRequest request) throws AppException {
+        if(request.getName() == null || userRepo.existsByName(request.getName())) throw new AppException(ErrorCode.USERNAME_EXISTED);
         if(request.getEmail() == null && request.getPhone() == null){
             throw new AppException(ErrorCode.INVALID_INPUT);
         }
-        else if(userRepo.existsByEmail(request.getEmail())){
+        else if(request.getEmail() != null && userRepo.existsByEmail(request.getEmail())){
             throw new AppException(ErrorCode.USER_EXISTED);
         }
-        else if(userRepo.existsByPhone(request.getPhone())){
+        else if(request.getPhone() != null && userRepo.existsByPhone(request.getPhone())){
             throw new AppException(ErrorCode.USER_EXISTED);
         }
+        request.setRoles(List.of(new RoleRequest("USER")));
         User user = toUser(request);
-        String urlImage = amazonS3Client.uploadImage(request.getMultipartFile());
+        if(request.getMultipartFile() != null) user.setImageUrl(amazonS3Client.uploadImage(request.getMultipartFile()));
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setImageUrl(urlImage);
         return userRepo.save(user);
     }
     @Override

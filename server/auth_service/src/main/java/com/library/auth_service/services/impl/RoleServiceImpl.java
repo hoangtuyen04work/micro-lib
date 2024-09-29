@@ -32,9 +32,8 @@ public class RoleServiceImpl implements RoleService {
     }
     @Override
     public Role toRole(RoleRequest request){
-        return Role.builder()
-                .roleName(request.getRoleName())
-                .build();
+
+        return roleRepo.findByRoleName(request.getRoleName());
     }
     @Override
     public RoleResponse toRoleResponse(Role role){
