@@ -12,7 +12,9 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface BookService {
-    PageResponse<BookResponse> search(String name, Long size, Long page);
+    List<BookResponse> getAll() throws JsonProcessingException;
+
+    PageResponse<BookResponse> search(String name, Integer size, Integer page) throws JsonProcessingException;
 
     Boolean returnBook(List<Long> bookIds);
 

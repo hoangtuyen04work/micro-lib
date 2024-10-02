@@ -7,9 +7,9 @@ server:
     context-path: /book
 spring:
   application:
-    name: auth_service
+    name: book_service
   datasource:
-    url: "jdbc:mysql://localhost:3306/book-lib?useSSL=false"
+    url: "jdbc:mysql://localhost:3306/book_lib?useSSL=false"
     username: root
     password: 12345678
   jpa:

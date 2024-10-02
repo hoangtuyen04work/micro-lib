@@ -1,24 +1,22 @@
 package com.library.book_service.dtos.requests;
 
-import com.library.book_service.entities.Category;
-import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToMany;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 @Getter
 @Setter
-@RequiredArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 public class BookRequest {
     Long id;
     String bookCode;
     String name;
-    Date publicationDate;
+    LocalDate publicationDate;
     String edition;
     Long numberPage;
     String shortDescription;

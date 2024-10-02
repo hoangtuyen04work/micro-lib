@@ -4,15 +4,16 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
-@Entity
 @Getter
 @Setter
-@RequiredArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
+@Entity
 @EntityListeners(BookListener.class)
 public class Book {
     @Id
@@ -20,9 +21,10 @@ public class Book {
     Long id;
     String bookCode;
     String name;
-    Date publicationDate;
+    LocalDate publicationDate;
     String edition;
     Long numberPage;
+    @Lob
     String shortDescription;
     Long price;
     String author;

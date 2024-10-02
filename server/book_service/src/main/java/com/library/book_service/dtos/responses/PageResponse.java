@@ -1,14 +1,16 @@
 package com.library.book_service.dtos.responses;
 
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 import java.util.List;
 
 @Getter
 @Setter
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@Builder
 public class PageResponse<T> {
     private List<T> content;
     private int pageNumber;

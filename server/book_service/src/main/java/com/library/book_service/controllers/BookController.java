@@ -7,6 +7,7 @@ import com.library.book_service.dtos.responses.BookResponse;
 import com.library.book_service.dtos.responses.PageResponse;
 import com.library.book_service.exceptions.AppException;
 import com.library.book_service.services.BookService;
+import com.library.book_service.services.impl.BookServiceImpl;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -20,12 +21,12 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/book")
 public class BookController {
-    BookService bookService;
+    BookServiceImpl bookService;
 
     @GetMapping("/search")
     public ApiResponse<PageResponse<BookResponse>> getAllBooks(@RequestParam String name,
-                                                               @RequestParam(defaultValue = "10") Long size,
-                                                               @RequestParam(defaultValue = "0") Long page){
+                                                               @RequestParam(defaultValue = "10") Integer size,
+                                                               @RequestParam(defaultValue = "0") Integer page) throws JsonProcessingException {
         return  ApiResponse.<PageResponse<BookResponse>>builder()
                 .data(bookService.search(name, size, page))
                 .build();
@@ -40,7 +41,7 @@ public class BookController {
     }
 
     @PostMapping("/number")
-    public ApiResponse<List<Long>> newBook(@RequestBody List<Long> ids) throws AppException, JsonProcessingException {
+    public ApiResponse<List<Long>> newBook(@RequestBody List<Long> ids) throws JsonProcessingException {
         return ApiResponse.<List<Long>>builder()
                 .data(bookService.getNumbers(ids))
                 .build();
@@ -62,7 +63,8 @@ public class BookController {
     }
 
     @PostMapping("/create")
-    public ApiResponse<BookResponse> createBook(@RequestBody NewBookRequest request) {
+    public ApiResponse<BookResponse> createBook(@ModelAttribute NewBookRequest request) {
+        System.err.println(request.getShortDescription().length());
         return ApiResponse.<BookResponse>builder()
                 .data(bookService.createBook(request))
                 .build();
@@ -75,10 +77,17 @@ public class BookController {
                 .build();
     }
 
+    @GetMapping("/getAll")
+    public ApiResponse<List<BookResponse>> getALlBook() throws AppException, JsonProcessingException {
+        return ApiResponse.<List<BookResponse>>builder()
+                .data(bookService.getAll())
+                .build();
+    }
+
     @PutMapping("/update")
     public ApiResponse<BookResponse> updateBook(@RequestParam Long id, @RequestBody NewBookRequest request) {
         return ApiResponse.<BookResponse>builder()
-                .data(bookService.updateBook(id, new NewBookRequest()))
+                .data(bookService.updateBook(id, request))
                 .build();
     }
 }

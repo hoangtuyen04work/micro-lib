@@ -22,8 +22,25 @@ public class BookRedisServiceImpl implements BookRedisService {
     ObjectMapper objectMapper;
 
     @Override
-    public PageResponse<BookResponse> search(String name, Long size, Long page) throws JsonProcessingException {
-        String key = new String("search_book:" + name + size + page);
+    public List<BookResponse> getAll() throws JsonProcessingException {
+        String key = new String("getAll");
+        String json = (String)redisTemplate.opsForValue().get(key);
+        return json == null ?
+                null
+                :
+                objectMapper.readValue(json, new TypeReference<List<BookResponse>>(){});
+    }
+
+    @Override
+    public void saveGetAll(List<BookResponse> response) throws JsonProcessingException {
+        StringBuilder key = new StringBuilder("getAll");
+        String json = objectMapper.writeValueAsString(response);
+        redisTemplate.opsForValue().set(String.valueOf(key), json);
+    }
+
+    @Override
+    public PageResponse<BookResponse> search(String name, Integer size, Integer page) throws JsonProcessingException {
+        String key = new String("search_book" + name + size + page);
 
         String json = (String)redisTemplate.opsForValue().get(key);
         return json == null ?
@@ -33,7 +50,7 @@ public class BookRedisServiceImpl implements BookRedisService {
     }
 
     @Override
-    public void saveSearch(String name, Long size, Long page, PageResponse<BookResponse> response) throws JsonProcessingException {
+    public void saveSearch(String name, Integer size, Integer page, PageResponse<BookResponse> response) throws JsonProcessingException {
         StringBuilder key = new StringBuilder("search_book" + name + size + page);
         String json = objectMapper.writeValueAsString(response);
         redisTemplate.opsForValue().set(String.valueOf(key), json);
@@ -45,7 +62,7 @@ public class BookRedisServiceImpl implements BookRedisService {
         for(Long id : ids){
             key.append(id);
         }
-        String json = (String)redisTemplate.opsForValue().get(key);
+        String json = (String)redisTemplate.opsForValue().get(key.toString());
         return json == null ?
                 null
                 :

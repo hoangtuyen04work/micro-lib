@@ -3,6 +3,8 @@ package com.library.book_service.services.impl;
 import com.library.book_service.dtos.requests.CategoryRequest;
 import com.library.book_service.dtos.responses.CategoryResponse;
 import com.library.book_service.entities.Category;
+import com.library.book_service.exceptions.AppException;
+import com.library.book_service.exceptions.ErrorCode;
 import com.library.book_service.repositories.CategoryRepo;
 import com.library.book_service.services.CategoryService;
 import lombok.AccessLevel;
@@ -10,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,6 +21,15 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
     CategoryRepo categoryRepo;
+
+    @Override
+    public List<Category> findByIds(List<CategoryRequest> requests){
+        List<Category> categories = new ArrayList<>();
+        for(CategoryRequest request : requests){
+            categories.add(categoryRepo.findById(request.getId()).get());
+        }
+        return categories;
+    }
 
     @Override
     public List<CategoryResponse> getALl(){

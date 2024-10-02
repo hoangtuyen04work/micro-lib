@@ -7,6 +7,8 @@ import com.library.book_service.entities.Category;
 import java.util.List;
 
 public interface CategoryService {
+    List<Category> findByIds(List<CategoryRequest> requests);
+
     List<CategoryResponse> getALl();
 
     CategoryResponse createCategory(CategoryRequest request);

@@ -12,6 +12,7 @@ import com.library.book_service.repositories.BookRepo;
 import com.library.book_service.repositories.httpclient.AmazonS3Client;
 import com.library.book_service.services.BookRedisService;
 import com.library.book_service.services.BookService;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -35,16 +36,31 @@ public class BookServiceImpl implements BookService{
     BookRedisService bookRedisService;
 
     @Override
-    public PageResponse<BookResponse> search(String name, Long size, Long page){
-        Pageable pageable = PageRequest.of(Math.toIntExact(size), Math.toIntExact(page));
-        Page<Book> books = bookRepo.searchBookBy(name, pageable);
-        return PageResponse.<BookResponse>builder()
+    public List<BookResponse> getAll() throws JsonProcessingException {
+        List<BookResponse> responses;
+        responses = bookRedisService.getAll();
+        if(responses != null) return responses;
+        responses = bookRepo.findAll().stream().map(this::toBookResponse).toList();
+        bookRedisService.saveGetAll(responses);
+        return responses;
+    }
+
+    @Override
+    public PageResponse<BookResponse> search(String name, Integer size, Integer page) throws JsonProcessingException {
+        PageResponse<BookResponse> responses;
+        responses = bookRedisService.search(name, size, page);
+        if(responses != null) return responses;
+        Pageable pageable = PageRequest.of(page - 1, size);
+        Page<Book> books = bookRepo.findByNameContaining(name, pageable);
+        PageResponse<BookResponse> response = PageResponse.<BookResponse>builder()
                 .totalPages(books.getTotalPages())
                 .content(toBookResponses(books.getContent()))
                 .pageSize(books.getSize())
                 .totalElements(books.getTotalElements())
                 .pageNumber(books.getNumber())
                 .build();
+        bookRedisService.saveSearch(name, size, page, response);
+        return response;
     }
 
     @Override
@@ -55,6 +71,7 @@ public class BookServiceImpl implements BookService{
         return true;
     }
 
+    @Transactional
     @Override
     public void returnBook(Long id){
         Book book = bookRepo.findById(id).get();
@@ -82,9 +99,12 @@ public class BookServiceImpl implements BookService{
         if(bookRedisService.getNumbers(ids) != null){
             return bookRedisService.getNumbers(ids);
         }
-        List<Book> books = bookRepo.findAll(ids);
+        List<Book> books = new ArrayList<>();
+        for(Long id : ids){
+            books.add(bookRepo.findById(id).get());
+        }
         List<Long> id = new ArrayList<>();
-        for (Book book : books) id.add(book.getId());
+        for (Book book : books) id.add(book.getNumber());
         bookRedisService.saveGetNumbers(ids, id);
         return id;
     }
@@ -100,14 +120,17 @@ public class BookServiceImpl implements BookService{
     }
 
     @Override
-    public List<BookResponse> getById(List<Long> id) throws JsonProcessingException, AppException {
-        if(bookRedisService.get(id) != null){
-            return bookRedisService.get(id);
+    public List<BookResponse> getById(List<Long> ids) throws JsonProcessingException, AppException {
+        if(bookRedisService.get(ids) != null){
+            return bookRedisService.get(ids);
         }
-        List<Book> book = bookRepo.findAll(id);
+        List<Book> book = new ArrayList<>();
+        for (Long id : ids){
+            book.add(bookRepo.findById(id).get());
+        }
         if(book.isEmpty()) throw new AppException(ErrorCode.NOT_EXIST_BOOK);
         List<BookResponse> response = book.stream().map(this::toBookResponse).toList();
-        bookRedisService.saveGetBook(id,response);
+        bookRedisService.saveGetBook(ids,response);
         return response;
     }
 
@@ -131,7 +154,7 @@ public class BookServiceImpl implements BookService{
             throw new RuntimeException("Book not found with id: " + id);
         Book book = optionalBook.get();
         book.setBookCode(updated.getBookCode());
-        book.setCategories(categoryService.toCategories(updated.getCategories()));
+        book.setCategories(categoryService.findByIds(updated.getCategories()));
         book.setAuthor(updated.getAuthor());
         book.setEdition(updated.getEdition());
         book.setNumberPage(updated.getNumberPage());
@@ -155,6 +178,7 @@ public class BookServiceImpl implements BookService{
     @Override
     public BookResponse createBook(NewBookRequest request){
         Book book = toBook(request);
+        book.setCategories(categoryService.findByIds(request.getCategories()));
         book.setImageUrl(amazonS3Client.uploadImage(request.getImage()));
         return toBookResponse(bookRepo.save(book));
     }
