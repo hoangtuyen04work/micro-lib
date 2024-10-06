@@ -21,7 +21,7 @@ public class SearchController {
     @GetMapping()
     public ApiResponse<PageResponse<BookResponse>> search(@RequestParam String name,
                                                           @RequestParam(defaultValue = "10")Long size,
-                                                          @RequestParam(defaultValue = "0")Long page) {
+                                                          @RequestParam(defaultValue = "1")Long page) {
         return ApiResponse.<PageResponse<BookResponse>>builder()
                 .data(searchService.search(name, size, page))
                 .build();

@@ -16,23 +16,24 @@ import java.util.List;
 public class BorrowController {
     BorrowService borrowService;
 
+
     @PutMapping("/borrow/{id}")
-    public ApiResponse<Boolean> borrowBook(@RequestBody List<Long> ids, @RequestParam Long userId) {
+    public ApiResponse<Boolean> borrowBook(@RequestBody List<Long> ids, @PathVariable Long id) {
         return ApiResponse.<Boolean>builder()
-                .data(borrowService.borrowBook(ids, userId))
+                .data(borrowService.borrowBook(ids, id))
                 .build();
     }
 
     @PutMapping("/return/{id}")
-    public ApiResponse<Boolean> returnBook(@RequestBody List<Long> ids) {
+    public ApiResponse<Boolean> returnBook(@RequestBody List<Long> ids, Long id) {
         return ApiResponse.<Boolean>builder()
-                .data(borrowService.returnBooks(ids))
+                .data(borrowService.returnBooks(ids, id))
                 .build();
     }
 
     @GetMapping()
-    public ApiResponse<List<BorrowResponse>> getBorrowByState(@RequestParam("userId") Long userId,
-                                                              @RequestParam("status") String status
+    public ApiResponse<List<BorrowResponse>> getBorrowByState(@RequestParam() Long userId,
+                                                              @RequestParam(defaultValue = "BORROWED") String status
                                                               ){
         return ApiResponse.<List<BorrowResponse>>builder()
                 .data(borrowService.findByUserId(userId, status))

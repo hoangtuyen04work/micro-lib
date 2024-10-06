@@ -10,4 +10,5 @@ import java.util.List;
 public interface BorrowRepo extends JpaRepository<Borrow, Long> {
     List<Borrow> findByUserIdAndStatus(Long userId, String status);
     List<Borrow> findByBookId(Long bookId);
+    List<Borrow> findByUserId(Long userId);
 }

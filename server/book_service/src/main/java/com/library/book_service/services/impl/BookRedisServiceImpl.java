@@ -21,6 +21,7 @@ public class BookRedisServiceImpl implements BookRedisService {
     RedisTemplate<String, Object> redisTemplate;
     ObjectMapper objectMapper;
 
+
     @Override
     public List<BookResponse> getAll() throws JsonProcessingException {
         String key = new String("getAll");
@@ -91,7 +92,7 @@ public class BookRedisServiceImpl implements BookRedisService {
 
     @Override
     public void saveGetNumberById(Long id,Long number) throws JsonProcessingException {
-        String key = "get_book:" + id;
+        String key = "get_number:" + id;
         String json = objectMapper.writeValueAsString(number);
         redisTemplate.opsForValue().set(key, json);
     }

@@ -7,7 +7,6 @@ import com.library.book_service.dtos.responses.BookResponse;
 import com.library.book_service.dtos.responses.PageResponse;
 import com.library.book_service.entities.Book;
 import com.library.book_service.exceptions.AppException;
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -18,11 +17,11 @@ public interface BookService {
 
     Boolean returnBook(List<Long> bookIds);
 
-    void returnBook(Long id);
+    String returnBook(Long id);
 
     Boolean borrow(List<Long> ids);
 
-    void borrow(Long id) throws AppException, JsonProcessingException;
+    String borrow(Long id) throws AppException, JsonProcessingException;
 
     List<Long> getNumbers(List<Long> ids) throws JsonProcessingException;
 

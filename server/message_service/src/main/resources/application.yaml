@@ -13,4 +13,9 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
-
+websocket:
+  groupId: "message"
+  simpleBroker: "/topic"
+  prefix: "/message"
+  endpoint: "/websocket"
+  sendTo: "/topic/receiver"

@@ -1,6 +1,6 @@
 package com.library.search_service.exceptions;
 
-import com.library.borrow_service.dtos.ApiResponse;
+import com.library.search_service.dtos.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;

@@ -8,9 +8,12 @@ import java.util.List;
 public interface BorrowService {
 
 
+
     boolean borrowBook(List<Long> bookIds, Long userId);
 
-    boolean returnBooks(List<Long> borrowIds);
+    boolean returnBooks(List<Long> borrowIds, Long id);
+
+    void returnBook(Long borrowId);
 
     List<BorrowResponse> findByUserId(Long userId, String status);
 

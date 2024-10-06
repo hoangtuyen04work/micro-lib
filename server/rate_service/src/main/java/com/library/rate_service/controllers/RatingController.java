@@ -3,6 +3,7 @@ package com.library.rate_service.controllers;
 import com.library.rate_service.dtos.ApiResponse;
 import com.library.rate_service.dtos.requests.RatingRequest;
 import com.library.rate_service.dtos.responses.RatingResponse;
+import com.library.rate_service.exceptions.AppException;
 import com.library.rate_service.services.RatingService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -13,12 +14,13 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/rate")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RatingController {
 
     RatingService ratingService;
 
-    @PostMapping
+    @PostMapping()
     public ApiResponse<RatingResponse> rateBook(@RequestBody RatingRequest request) {
         return ApiResponse.<RatingResponse>builder()
                 .data(ratingService.rateBook(request))
@@ -48,7 +50,7 @@ public class RatingController {
     }
 
     @GetMapping("/user/{userId}/book/{bookId}")
-    public ApiResponse<RatingResponse> getRatingByUserAndBook(@PathVariable Long userId, @PathVariable Long bookId) {
+    public ApiResponse<RatingResponse> getRatingByUserAndBook(@PathVariable Long userId, @PathVariable Long bookId) throws AppException {
         return ApiResponse.<RatingResponse>builder()
                 .data(ratingService.getRatingByUserAndBook(userId, bookId))
                 .build();

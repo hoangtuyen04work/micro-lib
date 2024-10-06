@@ -2,7 +2,9 @@ package com.library.book_service.services.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.library.book_service.dtos.requests.BookRequest;
+import com.library.book_service.dtos.requests.BorrowNotificationRequest;
 import com.library.book_service.dtos.requests.NewBookRequest;
+import com.library.book_service.dtos.requests.ReturnNotificationRequest;
 import com.library.book_service.dtos.responses.BookResponse;
 import com.library.book_service.dtos.responses.PageResponse;
 import com.library.book_service.entities.Book;
@@ -12,15 +14,18 @@ import com.library.book_service.repositories.BookRepo;
 import com.library.book_service.repositories.httpclient.AmazonS3Client;
 import com.library.book_service.services.BookRedisService;
 import com.library.book_service.services.BookService;
-import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +39,14 @@ public class BookServiceImpl implements BookService{
     CategoryServiceImpl categoryService;
     AmazonS3Client amazonS3Client;
     BookRedisService bookRedisService;
+    KafkaTemplate<String, ReturnNotificationRequest> kafkaReturn;
+    KafkaTemplate<String, BorrowNotificationRequest> kafkaBorrow;
+    @NonFinal
+    @Value("${kafka.return}")
+    String returnTopic;
+    @Value("${jwt.signerKey}")
+    @NonFinal
+    String borrowTopic;
 
     @Override
     public List<BookResponse> getAll() throws JsonProcessingException {
@@ -63,35 +76,49 @@ public class BookServiceImpl implements BookService{
         return response;
     }
 
+
+
     @Override
     public Boolean returnBook(List<Long> bookIds){
+        List<String> name = new ArrayList<>();
         for(Long id : bookIds){
-            returnBook(id);
+            name.add(returnBook(id));
         }
+        kafkaBorrow.send(borrowTopic, BorrowNotificationRequest.builder()
+                        .bookName(name)
+                        .borrowTime(LocalDate.now())
+                .build());
         return true;
     }
 
-    @Transactional
     @Override
-    public void returnBook(Long id){
+    public String returnBook(Long id){
         Book book = bookRepo.findById(id).get();
-        book.setNumber(book.getNumber() + 1);
+        Long number = book.getNumber();
+        book.setNumber(number + 1);
         bookRepo.save(book);
+        return book.getName();
     }
 
     @Override
     public Boolean borrow(List<Long> ids){
+        List<String> name = new ArrayList<>();
         for(Long id : ids){
-            borrow(id);
+            name.add(borrow(id));
         }
+        kafkaReturn.send(returnTopic, ReturnNotificationRequest.builder()
+                        .bookName(name)
+                        .borrowTime(LocalDate.now())
+                .build());
         return true;
     }
 
     @Override
-    public void borrow(Long id){
+    public String borrow(Long id){
         Book book = bookRepo.findById(id).get();
         book.setNumber(book.getNumber() - 1);
         bookRepo.save(book);
+        return book.getName();
     }
 
     @Override

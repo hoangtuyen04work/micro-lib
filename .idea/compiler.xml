@@ -7,8 +7,8 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="message_service" />
+        <module name="notification" />
         <module name="auth_service" />
-        <module name="comment_service" />
         <module name="api_gateway" />
         <module name="rate_service" />
         <module name="borrow_service" />
@@ -16,6 +16,9 @@
         <module name="search_service" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="comment_service" target="21" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
@@ -25,6 +28,7 @@
       <module name="borrow_service" options="-parameters" />
       <module name="comment_service" options="-parameters" />
       <module name="message_service" options="-parameters" />
+      <module name="notification" options="-parameters" />
       <module name="rate_service" options="-parameters" />
       <module name="search_service" options="-parameters" />
     </option>

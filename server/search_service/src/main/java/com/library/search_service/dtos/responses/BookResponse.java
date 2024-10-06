@@ -3,12 +3,13 @@ package com.library.search_service.dtos.responses;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 @Getter
 @Setter
-@RequiredArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 public class BookResponse {
@@ -16,7 +17,7 @@ public class BookResponse {
     Long id;
     String bookCode;
     String name;
-    Date publicationDate;
+    LocalDate publicationDate;
     String edition;
     Long numberPage;
     String shortDescription;

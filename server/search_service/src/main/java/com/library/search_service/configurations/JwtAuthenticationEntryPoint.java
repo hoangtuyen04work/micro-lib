@@ -1,8 +1,8 @@
 package com.library.search_service.configurations;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.library.borrow_service.dtos.ApiResponse;
-import com.library.borrow_service.exceptions.ErrorCode;
+import com.library.search_service.dtos.ApiResponse;
+import com.library.search_service.exceptions.ErrorCode;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

@@ -5,8 +5,7 @@ import com.library.borrow_service.entities.Borrow;
 import com.library.borrow_service.repositories.BorrowRepo;
 import com.library.borrow_service.repositories.httpclients.BookClient;
 import com.library.borrow_service.services.BorrowService;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
@@ -21,9 +20,11 @@ public class BorrowServiceImpl implements BorrowService {
     BorrowRepo borrowRepo;
     BookClient bookClient;
 
+
     @Override
     public boolean borrowBook(List<Long> bookIds, Long userId) {
         bookClient.borrow(bookIds);
+        List<String> name = new ArrayList<>();
         for (Long bookId : bookIds) {
             Borrow borrow = Borrow.builder()
                     .bookId(bookId)
@@ -38,13 +39,21 @@ public class BorrowServiceImpl implements BorrowService {
     }
 
     @Override
-    public boolean returnBooks(List<Long> borrowIds) {
+    public boolean returnBooks(List<Long> borrowIds, Long userId) {
         List<Long> bookIds = new ArrayList<>();
         for(Long id : borrowIds){
             bookIds.add(borrowRepo.findById(id).get().getBookId());
+            returnBook(id);
         }
         bookClient.returnBook(bookIds);
         return true;
+    }
+
+    @Override
+    public void returnBook(Long borrowId){
+        Borrow borrow = borrowRepo.findById(borrowId).get();
+        borrow.setStatus("RETURNED");
+        borrowRepo.save(borrow);
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.library.rate_service.services;
 import com.library.rate_service.dtos.requests.RatingRequest;
 import com.library.rate_service.dtos.responses.RatingResponse;
 import com.library.rate_service.entities.Rating;
+import com.library.rate_service.exceptions.AppException;
 
 import java.util.List;
 
@@ -16,7 +17,7 @@ public interface RatingService {
 
     List<RatingResponse> getRatingsByBookId(Long bookId);
 
-    RatingResponse getRatingByUserAndBook(Long userId, Long bookId);
+    RatingResponse getRatingByUserAndBook(Long userId, Long bookId) throws AppException;
 
     Double getAverageRatingForBook(Long bookId);
 
