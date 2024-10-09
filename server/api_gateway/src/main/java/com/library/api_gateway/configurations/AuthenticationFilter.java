@@ -43,6 +43,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
         if(isPublicEndPoint(exchange.getRequest()))
             return  chain.filter(exchange);
         List<String> authHeader = exchange.getRequest().getHeaders().get(HttpHeaders.AUTHORIZATION);
+        if(authHeader == null || authHeader.getFirst().isBlank()) return unAuthenticated(exchange.getResponse());
         String token = authHeader.getFirst().replace("Bearer ", "");
         return authService.authenticate(token).flatMap(unAuthenticate->{
             if(CollectionUtils.isEmpty(authHeader))

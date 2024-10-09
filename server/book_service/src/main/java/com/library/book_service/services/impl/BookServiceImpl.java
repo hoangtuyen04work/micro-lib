@@ -6,6 +6,7 @@ import com.library.book_service.dtos.requests.BorrowNotificationRequest;
 import com.library.book_service.dtos.requests.NewBookRequest;
 import com.library.book_service.dtos.requests.ReturnNotificationRequest;
 import com.library.book_service.dtos.responses.BookResponse;
+import com.library.book_service.dtos.responses.BookResponseSimple;
 import com.library.book_service.dtos.responses.PageResponse;
 import com.library.book_service.entities.Book;
 import com.library.book_service.exceptions.AppException;
@@ -14,6 +15,7 @@ import com.library.book_service.repositories.BookRepo;
 import com.library.book_service.repositories.httpclient.AmazonS3Client;
 import com.library.book_service.services.BookRedisService;
 import com.library.book_service.services.BookService;
+import com.library.book_service.services.CategoryService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -22,12 +24,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -36,7 +40,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class BookServiceImpl implements BookService{
     BookRepo bookRepo;
-    CategoryServiceImpl categoryService;
+    CategoryService categoryService;
     AmazonS3Client amazonS3Client;
     BookRedisService bookRedisService;
     KafkaTemplate<String, ReturnNotificationRequest> kafkaReturn;
@@ -47,6 +51,16 @@ public class BookServiceImpl implements BookService{
     @Value("${jwt.signerKey}")
     @NonFinal
     String borrowTopic;
+    @Override
+    public PageResponse<BookResponseSimple> getTop(Long size, Long page, Long typeId){
+       Pageable pageable = PageRequest.of(Math.toIntExact(page - 1), Math.toIntExact(size), Sort.by("numberBorrowed").descending());
+       if(typeId == 0){
+           return toBookResponseSimple(bookRepo.findAll(pageable));
+       }
+       else{
+           return toBookResponseSimple(bookRepo.findByCategoriesIn(List.of(categoryService.findById(typeId)), pageable));
+       }
+    }
 
     @Override
     public List<BookResponse> getAll() throws JsonProcessingException {
@@ -65,18 +79,10 @@ public class BookServiceImpl implements BookService{
         if(responses != null) return responses;
         Pageable pageable = PageRequest.of(page - 1, size);
         Page<Book> books = bookRepo.findByNameContaining(name, pageable);
-        PageResponse<BookResponse> response = PageResponse.<BookResponse>builder()
-                .totalPages(books.getTotalPages())
-                .content(toBookResponses(books.getContent()))
-                .pageSize(books.getSize())
-                .totalElements(books.getTotalElements())
-                .pageNumber(books.getNumber())
-                .build();
+        PageResponse<BookResponse> response = toPageResponse(books);
         bookRedisService.saveSearch(name, size, page, response);
         return response;
     }
-
-
 
     @Override
     public Boolean returnBook(List<Long> bookIds){
@@ -116,6 +122,7 @@ public class BookServiceImpl implements BookService{
     @Override
     public String borrow(Long id){
         Book book = bookRepo.findById(id).get();
+        book.setNumberBorrowed(book.getNumberBorrowed() + 1);
         book.setNumber(book.getNumber() - 1);
         bookRepo.save(book);
         return book.getName();
@@ -173,7 +180,7 @@ public class BookServiceImpl implements BookService{
         return response;
     }
 
-    //Update Book
+
     @Override
     public BookResponse updateBook(Long id, NewBookRequest updated){
         Optional<Book> optionalBook = bookRepo.findById(id);
@@ -207,6 +214,7 @@ public class BookServiceImpl implements BookService{
         Book book = toBook(request);
         book.setCategories(categoryService.findByIds(request.getCategories()));
         book.setImageUrl(amazonS3Client.uploadImage(request.getImage()));
+        book.setNumberBorrowed(0L);
         return toBookResponse(bookRepo.save(book));
     }
 
@@ -215,11 +223,59 @@ public class BookServiceImpl implements BookService{
         return books.stream().map(this::toBookResponse).collect(Collectors.toList());
     }
 
+    @Override
+    public PageResponse<BookResponseSimple> toPageResponseSimple(Page<Book> books){
+        return PageResponse.<BookResponseSimple>builder()
+                .totalPages(books.getTotalPages())
+                .content(toBookResponseSimple(books.getContent()))
+                .pageSize(books.getSize())
+                .totalElements(books.getTotalElements())
+                .pageNumber(books.getNumber())
+                .build();
+    }
+
+    @Override
+    public PageResponse<BookResponse> toPageResponse(Page<Book> books){
+        return PageResponse.<BookResponse>builder()
+                .totalPages(books.getTotalPages())
+                .content(toBookResponses(books.getContent()))
+                .pageSize(books.getSize())
+                .totalElements(books.getTotalElements())
+                .pageNumber(books.getNumber())
+                .build();
+    }
+
+    @Override
+    public List<BookResponseSimple> toBookResponseSimple(List<Book> request){
+        return request.stream().map(this::toBookResponseSimple).toList();
+    }
+
+    @Override
+    public PageResponse<BookResponseSimple> toBookResponseSimple(Page<Book> request){
+        return PageResponse.<BookResponseSimple>builder()
+                .pageNumber(request.getNumber())
+                .totalElements(request.getTotalElements())
+                .pageSize(request.getSize())
+                .content(request.getContent().stream().map(this::toBookResponseSimple).toList())
+                .build();
+    }
+
+    @Override
+    public BookResponseSimple toBookResponseSimple(Book request){
+        return BookResponseSimple.builder()
+                .id(request.getId())
+                .imageIrl(request.getImageUrl())
+                .name(request.getName())
+                .numberBorrowed(request.getNumberBorrowed())
+                .build();
+    }
+
     //convert NewBookRequest to Book
     @Override
     public Book toBook(NewBookRequest request){
         return Book.builder()
                 .number(request.getNumber())
+                .numberBorrowed(0L)
                 .id(request.getId())
                 .bookCode(request.getBookCode())
                 .name(request.getName())
@@ -250,6 +306,7 @@ public class BookServiceImpl implements BookService{
                 .numberPage(request.getNumberPage())
                 .publicationDate(request.getPublicationDate())
                 .edition(request.getEdition())
+                .numberBorrowed(request.getNumberBorrowed())
                 .build();
     }
 
@@ -257,6 +314,7 @@ public class BookServiceImpl implements BookService{
     public BookResponse toBookResponse(Book request){
         return BookResponse.builder()
                 .id(request.getId())
+                .numberBorrowed(request.getNumberBorrowed())
                 .bookCode(request.getBookCode())
                 .name(request.getName())
                 .number(request.getNumber())

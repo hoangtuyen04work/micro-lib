@@ -3,8 +3,6 @@ package com.library.book_service.services.impl;
 import com.library.book_service.dtos.requests.CategoryRequest;
 import com.library.book_service.dtos.responses.CategoryResponse;
 import com.library.book_service.entities.Category;
-import com.library.book_service.exceptions.AppException;
-import com.library.book_service.exceptions.ErrorCode;
 import com.library.book_service.repositories.CategoryRepo;
 import com.library.book_service.services.CategoryService;
 import lombok.AccessLevel;
@@ -21,6 +19,16 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
     CategoryRepo categoryRepo;
+
+    @Override
+    public Category findById(Long id){
+        return categoryRepo.findById(id).get();
+    }
+
+    @Override
+    public Category findByCategory(String name){
+        return categoryRepo.findByCategory(name);
+    }
 
     @Override
     public List<Category> findByIds(List<CategoryRequest> requests){

@@ -4,14 +4,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.library.book_service.dtos.ApiResponse;
 import com.library.book_service.dtos.requests.NewBookRequest;
 import com.library.book_service.dtos.responses.BookResponse;
+import com.library.book_service.dtos.responses.BookResponseSimple;
 import com.library.book_service.dtos.responses.PageResponse;
 import com.library.book_service.exceptions.AppException;
-import com.library.book_service.services.BookService;
 import com.library.book_service.services.impl.BookServiceImpl;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.data.domain.Page;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -62,6 +62,7 @@ public class BookController {
                 .build();
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PostMapping("/create")
     public ApiResponse<BookResponse> createBook(@ModelAttribute NewBookRequest request) {
         System.err.println(request.getShortDescription().length());
@@ -84,10 +85,20 @@ public class BookController {
                 .build();
     }
 
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PutMapping("/update")
     public ApiResponse<BookResponse> updateBook(@RequestParam Long id, @RequestBody NewBookRequest request) {
         return ApiResponse.<BookResponse>builder()
                 .data(bookService.updateBook(id, request))
+                .build();
+    }
+
+    @GetMapping("/top")
+    public ApiResponse<PageResponse<BookResponseSimple>> topAll(@RequestParam(defaultValue = "10") Long size,
+                                                        @RequestParam(defaultValue = "1") Long page,
+                                                        @RequestParam(defaultValue = "0") Long typeId){
+        return ApiResponse.<PageResponse<BookResponseSimple>>builder()
+                .data(bookService.getTop(size, page, typeId))
                 .build();
     }
 }

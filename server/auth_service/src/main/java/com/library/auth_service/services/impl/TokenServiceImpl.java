@@ -63,8 +63,10 @@ public class TokenServiceImpl implements TokenService {
         return AuthResponse.builder()
                 .id(user.getId())
                 .token(token.getToken())
+                .name(user.getName())
                 .phone(user.getPhone())
                 .email(user.getEmail())
+                .imageUrl(user.getImageUrl())
                 .refreshToken(token.getRefreshToken())
                 .build();
     }
@@ -77,6 +79,7 @@ public class TokenServiceImpl implements TokenService {
         return AuthResponse.builder()
                 .id(user.getId())
                 .token(token.getToken())
+                .imageUrl(user.getImageUrl())
                 .phone(user.getPhone())
                 .email(user.getEmail())
                 .name(user.getName())

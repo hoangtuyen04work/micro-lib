@@ -14,6 +14,7 @@ import java.util.List;
 @Builder
 public class BookRequest {
     Long id;
+    Long numberBorrowed;
     String bookCode;
     String name;
     LocalDate publicationDate;

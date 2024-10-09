@@ -66,7 +66,6 @@ public class SecurityConfig {
                 .build();
         jwtDecoder.setJwtValidator(JwtValidators.createDefaultWithIssuer(signerKey));
         return jwtDecoder;
-
     }
 
     @Bean
