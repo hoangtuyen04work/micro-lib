@@ -3,8 +3,8 @@ jwt:
 kafka:
   borrow: "borrow"
   return: "return"
-websocket:
   groupId: "notification"
+websocket:
   simpleBroker: "/notify"
   prefix: "/notify"
   endpoint: "/websocket"

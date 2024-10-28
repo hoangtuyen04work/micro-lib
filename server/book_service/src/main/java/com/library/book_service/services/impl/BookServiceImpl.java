@@ -48,17 +48,25 @@ public class BookServiceImpl implements BookService{
     @NonFinal
     @Value("${kafka.return}")
     String returnTopic;
-    @Value("${jwt.signerKey}")
+    @Value("${kafka.borrow}")
     @NonFinal
     String borrowTopic;
+
     @Override
-    public PageResponse<BookResponseSimple> getTop(Long size, Long page, Long typeId){
+    public PageResponse<BookResponseSimple> getTop(Integer size, Integer page, Integer typeId) throws JsonProcessingException {
+        PageResponse<BookResponseSimple> responses = bookRedisService.getTop(typeId, size, page);
+        if(responses != null) return responses;
        Pageable pageable = PageRequest.of(Math.toIntExact(page - 1), Math.toIntExact(size), Sort.by("numberBorrowed").descending());
+       PageResponse<BookResponseSimple> response;
        if(typeId == 0){
-           return toBookResponseSimple(bookRepo.findAll(pageable));
+           response =  toBookResponseSimple(bookRepo.findAll(pageable));
+           bookRedisService.saveGetTop(typeId, size, page, response);
+           return response;
        }
        else{
-           return toBookResponseSimple(bookRepo.findByCategoriesIn(List.of(categoryService.findById(typeId)), pageable));
+           response =  toBookResponseSimple(bookRepo.findByCategoriesIn(List.of(categoryService.findById(Long.valueOf(typeId))), pageable));
+           bookRedisService.saveGetTop(typeId, size, page, response);
+           return response;
        }
     }
 
@@ -73,13 +81,13 @@ public class BookServiceImpl implements BookService{
     }
 
     @Override
-    public PageResponse<BookResponse> search(String name, Integer size, Integer page) throws JsonProcessingException {
-        PageResponse<BookResponse> responses;
+    public PageResponse<BookResponseSimple> search(String name, Integer size, Integer page) throws JsonProcessingException {
+        PageResponse<BookResponseSimple> responses;
         responses = bookRedisService.search(name, size, page);
         if(responses != null) return responses;
         Pageable pageable = PageRequest.of(page - 1, size);
         Page<Book> books = bookRepo.findByNameContaining(name, pageable);
-        PageResponse<BookResponse> response = toPageResponse(books);
+        PageResponse<BookResponseSimple> response = toPageResponseSimple(books);
         bookRedisService.saveSearch(name, size, page, response);
         return response;
     }
@@ -122,7 +130,7 @@ public class BookServiceImpl implements BookService{
     @Override
     public String borrow(Long id){
         Book book = bookRepo.findById(id).get();
-        book.setNumberBorrowed(book.getNumberBorrowed() + 1);
+        book.setNumberBorrowed((book.getNumberBorrowed() == null ? 0 : book.getNumberBorrowed()) + 1);
         book.setNumber(book.getNumber() - 1);
         bookRepo.save(book);
         return book.getName();
@@ -264,7 +272,7 @@ public class BookServiceImpl implements BookService{
     public BookResponseSimple toBookResponseSimple(Book request){
         return BookResponseSimple.builder()
                 .id(request.getId())
-                .imageIrl(request.getImageUrl())
+                .imageUrl(request.getImageUrl())
                 .name(request.getName())
                 .numberBorrowed(request.getNumberBorrowed())
                 .build();

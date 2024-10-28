@@ -11,8 +11,11 @@ import java.util.List;
         configuration =  {AuthenticationRequestInterceptor.class})
 public interface BookClient {
 
-    @PostMapping("/book/borrow")
+    @PostMapping("/book/borrows")
     ApiResponse<Boolean> borrow(@RequestBody List<Long> id);
+
+    @PostMapping("/book/borrow")
+    ApiResponse<Boolean> borrow(@RequestBody Long id);
 
     @PutMapping("/book/return")
     ApiResponse<Boolean> returnBook(@RequestBody List<Long> bookIds);

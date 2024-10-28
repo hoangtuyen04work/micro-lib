@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.library.api_gateway.dtos.ApiResponse;
+import com.library.api_gateway.dtos.AuthResponse;
 import com.library.api_gateway.services.AuthService;
 import lombok.experimental.NonFinal;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,17 +41,23 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        if(isPublicEndPoint(exchange.getRequest()))
-            return  chain.filter(exchange);
+        if (isPublicEndPoint(exchange.getRequest())) {
+            return chain.filter(exchange);
+        }
         List<String> authHeader = exchange.getRequest().getHeaders().get(HttpHeaders.AUTHORIZATION);
-        if(authHeader == null || authHeader.getFirst().isBlank()) return unAuthenticated(exchange.getResponse());
-        String token = authHeader.getFirst().replace("Bearer ", "");
-        return authService.authenticate(token).flatMap(unAuthenticate->{
-            if(CollectionUtils.isEmpty(authHeader))
-                return  chain.filter(exchange);
-            else return unAuthenticated(exchange.getResponse());
-        }).onErrorResume(throwable -> unAuthenticated(exchange.getResponse()));
+        if (authHeader == null || authHeader.isEmpty() || authHeader.get(0).isBlank()) {
+            return unAuthenticated(exchange.getResponse());
+        }
+        String token = authHeader.get(0).replace("Bearer ", "");
+        return authService.authenticate(token)
+                .flatMap(authResponse -> {
+                    return chain.filter(exchange);
+                })
+                .onErrorResume(throwable -> {
+                    return unAuthenticated(exchange.getResponse());
+                });
     }
+
 
     Mono<Void> unAuthenticated(ServerHttpResponse response){
         ApiResponse<?> apiResponse = ApiResponse.builder()

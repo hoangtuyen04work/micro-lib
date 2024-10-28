@@ -20,7 +20,6 @@ public class BorrowServiceImpl implements BorrowService {
     BorrowRepo borrowRepo;
     BookClient bookClient;
 
-
     @Override
     public boolean borrowBook(List<Long> bookIds, Long userId) {
         bookClient.borrow(bookIds);
@@ -39,13 +38,24 @@ public class BorrowServiceImpl implements BorrowService {
     }
 
     @Override
-    public boolean returnBooks(List<Long> borrowIds, Long userId) {
-        List<Long> bookIds = new ArrayList<>();
-        for(Long id : borrowIds){
-            bookIds.add(borrowRepo.findById(id).get().getBookId());
-            returnBook(id);
-        }
-        bookClient.returnBook(bookIds);
+    public boolean borrowBook(Long bookId, Long userId) {
+        bookClient.borrow(bookId);
+        List<String> name = new ArrayList<>();
+            Borrow borrow = Borrow.builder()
+                    .bookId(bookId)
+                    .userId(userId)
+                    .borrowDate(LocalDate.now())
+                    .returnDate(LocalDate.now().plusWeeks(1))
+                    .status("BORROWED")
+                    .build();
+            borrowRepo.save(borrow);
+
+        return true;
+    }
+
+    @Override
+    public boolean returnBooks(List<Long> bookId, Long userId) {
+        bookClient.returnBook(bookId);
         return true;
     }
 
@@ -54,6 +64,11 @@ public class BorrowServiceImpl implements BorrowService {
         Borrow borrow = borrowRepo.findById(borrowId).get();
         borrow.setStatus("RETURNED");
         borrowRepo.save(borrow);
+    }
+
+    @Override
+    public Boolean check(Long userId, Long bookId){
+        return borrowRepo.existsByUserIdAndBookId(userId, bookId);
     }
 
     @Override

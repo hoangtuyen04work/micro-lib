@@ -1,23 +1,24 @@
 package com.library.rate_service.services.impl;
 
-
 import com.library.rate_service.dtos.requests.RatingRequest;
+import com.library.rate_service.dtos.responses.PageResponse;
 import com.library.rate_service.dtos.responses.RatingResponse;
 import com.library.rate_service.entities.Rating;
 import com.library.rate_service.exceptions.AppException;
 import com.library.rate_service.exceptions.ErrorCode;
 import com.library.rate_service.repositories.RatingRepo;
 import com.library.rate_service.services.RatingService;
-import com.nimbusds.oauth2.sdk.AbstractOptionallyAuthenticatedRequest;
-import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -55,10 +56,10 @@ public class RatingServiceImpl implements RatingService {
     }
 
     @Override
-    public List<RatingResponse> getRatingsByBookId(Long bookId) {
-        return ratingRepo.findByBookId(bookId).stream()
-                .map(this::toRatingResponse)
-                .collect(Collectors.toList());
+    public PageResponse<RatingResponse> getRatingsByBookId(Long bookId, Long page, Long size) {
+        Pageable pageRequest = PageRequest.of(Math.toIntExact(page), Math.toIntExact(size), Sort.by("createdAt").descending());
+        Page<Rating> pages = ratingRepo.getRatingByBookId(bookId, pageRequest);
+        return toRatingResponse(pages);
     }
 
     @Override
@@ -75,6 +76,22 @@ public class RatingServiceImpl implements RatingService {
                 .mapToInt(Rating::getRating)
                 .average()
                 .orElse(0.0);
+    }
+
+    @Override
+    public PageResponse<RatingResponse> toRatingResponse(Page<Rating> pages){
+        return PageResponse.<RatingResponse>builder()
+                .content(toPageResponses(pages.getContent()))
+                .pageNumber(pages.getNumber())
+                .pageSize(pages.getSize())
+                .totalElements(pages.getTotalElements())
+                .totalPages(pages.getTotalPages())
+                .build();
+    }
+
+    @Override
+    public List<RatingResponse> toPageResponses(List<Rating> ratings){
+        return ratings.stream().map(this::toRatingResponse).toList();
     }
 
     @Override

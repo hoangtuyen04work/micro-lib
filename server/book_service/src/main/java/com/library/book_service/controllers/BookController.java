@@ -24,10 +24,10 @@ public class BookController {
     BookServiceImpl bookService;
 
     @GetMapping("/search")
-    public ApiResponse<PageResponse<BookResponse>> getAllBooks(@RequestParam String name,
+    public ApiResponse<PageResponse<BookResponseSimple>> getAllBooks(@RequestParam String name,
                                                                @RequestParam(defaultValue = "10") Integer size,
                                                                @RequestParam(defaultValue = "0") Integer page) throws JsonProcessingException {
-        return  ApiResponse.<PageResponse<BookResponse>>builder()
+        return  ApiResponse.<PageResponse<BookResponseSimple>>builder()
                 .data(bookService.search(name, size, page))
                 .build();
     }
@@ -47,8 +47,16 @@ public class BookController {
                 .build();
     }
 
-    @PostMapping("/borrow")
+    @PostMapping("/borrows")
     public ApiResponse<Boolean> borrow(@RequestBody List<Long> id){
+        bookService.borrow(id);
+        return ApiResponse.<Boolean>builder()
+                .data(true)
+                .build();
+    }
+
+    @PostMapping("/borrow")
+    public ApiResponse<Boolean> borrow(@RequestBody Long id){
         bookService.borrow(id);
         return ApiResponse.<Boolean>builder()
                 .data(true)
@@ -65,13 +73,12 @@ public class BookController {
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PostMapping("/create")
     public ApiResponse<BookResponse> createBook(@ModelAttribute NewBookRequest request) {
-        System.err.println(request.getShortDescription().length());
         return ApiResponse.<BookResponse>builder()
                 .data(bookService.createBook(request))
                 .build();
     }
 
-    @GetMapping("/get")
+    @GetMapping()
     public ApiResponse<BookResponse> getBook(@RequestParam Long id) throws AppException, JsonProcessingException {
         return ApiResponse.<BookResponse>builder()
                 .data(bookService.getById(id))
@@ -94,9 +101,9 @@ public class BookController {
     }
 
     @GetMapping("/top")
-    public ApiResponse<PageResponse<BookResponseSimple>> topAll(@RequestParam(defaultValue = "10") Long size,
-                                                        @RequestParam(defaultValue = "1") Long page,
-                                                        @RequestParam(defaultValue = "0") Long typeId){
+    public ApiResponse<PageResponse<BookResponseSimple>> topAll(@RequestParam(defaultValue = "10") Integer size,
+                                                        @RequestParam(defaultValue = "1") Integer page,
+                                                        @RequestParam(defaultValue = "0") Integer typeId) throws JsonProcessingException {
         return ApiResponse.<PageResponse<BookResponseSimple>>builder()
                 .data(bookService.getTop(size, page, typeId))
                 .build();

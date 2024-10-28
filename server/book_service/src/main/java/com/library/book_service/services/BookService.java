@@ -13,11 +13,11 @@ import org.springframework.data.domain.Page;
 import java.util.List;
 
 public interface BookService {
-    PageResponse<BookResponseSimple> getTop(Long size, Long page, Long typeId);
+    PageResponse<BookResponseSimple> getTop(Integer size, Integer page, Integer typeId) throws JsonProcessingException;
 
     List<BookResponse> getAll() throws JsonProcessingException;
 
-    PageResponse<BookResponse> search(String name, Integer size, Integer page) throws JsonProcessingException;
+    PageResponse<BookResponseSimple> search(String name, Integer size, Integer page) throws JsonProcessingException;
 
     Boolean returnBook(List<Long> bookIds);
 

@@ -1,4 +1,4 @@
-package com.library.book_service.dtos.responses;
+package com.library.search_service.dtos.responses;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;

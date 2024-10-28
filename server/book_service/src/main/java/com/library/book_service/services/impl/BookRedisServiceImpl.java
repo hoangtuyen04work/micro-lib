@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.library.book_service.dtos.responses.BookResponse;
+import com.library.book_service.dtos.responses.BookResponseSimple;
 import com.library.book_service.dtos.responses.PageResponse;
 import com.library.book_service.services.BookRedisService;
 import lombok.AccessLevel;
@@ -23,6 +24,23 @@ public class BookRedisServiceImpl implements BookRedisService {
 
 
     @Override
+    public PageResponse<BookResponseSimple> getTop(Integer typeId, Integer size, Integer page) throws JsonProcessingException {
+        String key = "getTop:" + "typeId_" + typeId + " size:" + size + " page:" + page;
+        String json = (String)redisTemplate.opsForValue().get(key);
+        return json == null ?
+                null
+                :
+                objectMapper.readValue(json, new TypeReference<PageResponse<BookResponseSimple>>(){});
+    }
+
+    @Override
+    public void saveGetTop(Integer typeId, Integer size, Integer page, PageResponse<BookResponseSimple> response) throws JsonProcessingException {
+        String key = "getTop:" + "typeId_" + typeId + " size:" + size + " page:" + page;
+        String json = objectMapper.writeValueAsString(response);
+        redisTemplate.opsForValue().set(String.valueOf(key), json);
+    }
+
+    @Override
     public List<BookResponse> getAll() throws JsonProcessingException {
         String key = new String("getAll");
         String json = (String)redisTemplate.opsForValue().get(key);
@@ -40,19 +58,19 @@ public class BookRedisServiceImpl implements BookRedisService {
     }
 
     @Override
-    public PageResponse<BookResponse> search(String name, Integer size, Integer page) throws JsonProcessingException {
-        String key = new String("search_book" + name + size + page);
+    public PageResponse<BookResponseSimple> search(String name, Integer size, Integer page) throws JsonProcessingException {
+        String key = "search_book" + name + size + page;
 
         String json = (String)redisTemplate.opsForValue().get(key);
         return json == null ?
                 null
                 :
-                objectMapper.readValue(json, new TypeReference<PageResponse<BookResponse>>() {});
+                objectMapper.readValue(json, new TypeReference<PageResponse<BookResponseSimple>>() {});
     }
 
     @Override
-    public void saveSearch(String name, Integer size, Integer page, PageResponse<BookResponse> response) throws JsonProcessingException {
-        StringBuilder key = new StringBuilder("search_book" + name + size + page);
+    public void saveSearch(String name, Integer size, Integer page, PageResponse<BookResponseSimple> response) throws JsonProcessingException {
+        String key = "search_book" + name + size + page;
         String json = objectMapper.writeValueAsString(response);
         redisTemplate.opsForValue().set(String.valueOf(key), json);
     }

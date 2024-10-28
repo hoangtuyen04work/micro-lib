@@ -43,7 +43,7 @@ spring:
         - id: rate_service
           uri: http://localhost:8085
           predicates:
-            - Path=${app.api-prefix}/rate/**
+            - Path=${app.api-prefix}/rating/**
           filters:
             - StripPrefix=1
         - id: search_service

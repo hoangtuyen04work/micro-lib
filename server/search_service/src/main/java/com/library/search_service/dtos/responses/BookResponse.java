@@ -16,6 +16,7 @@ public class BookResponse {
     Long number;
     Long id;
     String bookCode;
+    Long numberBorrowed;
     String name;
     LocalDate publicationDate;
     String edition;

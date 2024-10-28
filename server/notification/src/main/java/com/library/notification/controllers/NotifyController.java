@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@RestController
+@RestController()
 @RequiredArgsConstructor
 public class NotifyController {
     SimpMessagingTemplate simpMessagingTemplate;
@@ -27,14 +27,14 @@ public class NotifyController {
     @NonFinal
     String sendTo;
 
-    @KafkaListener(topics = "${kafka.return}", groupId = "${websocket.groupId.return}")
+    @KafkaListener(topics = "${kafka.return}", groupId = "${kafka.groupId}")
     public void returnNotify(@RequestBody ReturnNotificationRequest request) {
         simpMessagingTemplate.convertAndSend(sendTo, ApiResponse.<NotifyResponse>builder()
                 .data(returnNotifyService.returnNotify(request))
                 .build());
     }
 
-    @KafkaListener(topics = "${kafka.borrow}", groupId = "${websocket.groupId.borrow}")
+    @KafkaListener(topics = "${kafka.borrow}", groupId = "${kafka.groupId}")
     public void borrowNotify(@RequestBody BorrowNotificationRequest request) {
         simpMessagingTemplate.convertAndSend(sendTo, ApiResponse.<NotifyResponse>builder()
                 .data(borrowNotifyService.borrowNotify(request))

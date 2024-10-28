@@ -23,6 +23,7 @@ public class AuthController {
 
     @PostMapping("/authenticate")
     public ApiResponse<BooleanResponse> authenticate(@RequestBody AuthRequest authRequest) throws AppException {
+        BooleanResponse r = tokenServiceImpl.authenticate(authRequest);
         return ApiResponse.<BooleanResponse>builder()
                 .data(tokenServiceImpl.authenticate(authRequest))
                 .build();

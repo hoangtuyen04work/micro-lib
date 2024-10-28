@@ -89,7 +89,7 @@ public class TokenServiceImpl implements TokenService {
 
     @Override
     public BooleanResponse authenticate(AuthRequest authRequest) throws AppException {
-        if(!tokenRepo.existsByRefreshToken(authRequest.getRefreshToken()) || !tokenRepo.existsByToken(authRequest.getToken())){
+        if(!tokenRepo.existsByRefreshToken(authRequest.getRefreshToken()) && !tokenRepo.existsByToken(authRequest.getToken())){
             throw  new AppException(ErrorCode.TOKEN_INVALID);
         }
         return BooleanResponse.builder()
@@ -128,8 +128,8 @@ public class TokenServiceImpl implements TokenService {
                 .userid(user.getId())
                 .token(generateToken(user))
                 .refreshToken(generateRefreshToken())
-                .expiry_refreshToken(Date.from(Instant.now().plus(15*24*60*60, ChronoUnit.MILLIS)))
-                .expiry_refreshToken(Date.from(Instant.now().plus(30*24*60*60, ChronoUnit.MILLIS)))
+                .expiry_Token(Date.from(Instant.now().plus(15*24*60*60, ChronoUnit.SECONDS)))
+                .expiry_refreshToken(Date.from(Instant.now().plus(30*24*60*60, ChronoUnit.SECONDS)))
                 .build();
     }
 
@@ -146,7 +146,7 @@ public class TokenServiceImpl implements TokenService {
                 .subject(String.valueOf(user.getId()))
                 .issuer("LIBRARY")
                 .issueTime(new Date())
-                .expirationTime(Date.from(Instant.now().plus(15*24*60*60, ChronoUnit.MILLIS)))
+                .expirationTime(Date.from(Instant.now().plus(15*24*60*60, ChronoUnit.SECONDS)))
                 .jwtID(UUID.randomUUID().toString())
                 .claim("scope", roleScope)
                 .build();

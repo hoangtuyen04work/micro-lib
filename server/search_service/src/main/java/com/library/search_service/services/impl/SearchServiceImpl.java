@@ -1,6 +1,7 @@
 package com.library.search_service.services.impl;
 
 import com.library.search_service.dtos.responses.BookResponse;
+import com.library.search_service.dtos.responses.BookResponseSimple;
 import com.library.search_service.dtos.responses.PageResponse;
 import com.library.search_service.repositories.BookClient;
 import com.library.search_service.services.SearchService;
@@ -16,7 +17,7 @@ public class SearchServiceImpl implements SearchService {
     BookClient bookClient;
 
     @Override
-    public PageResponse<BookResponse> search(String name, Long size, Long page) {
+    public PageResponse<BookResponseSimple> search(String name, Long size, Long page) {
         return bookClient.findBook(name, size, page).getData();
     }
 }
