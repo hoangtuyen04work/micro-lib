@@ -2,11 +2,8 @@ package com.library.notification.dtos.responses;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.springframework.cglib.core.Local;
 
-import java.time.LocalDate;
 import java.util.List;
-
 
 @Getter
 @Setter
@@ -14,11 +11,11 @@ import java.util.List;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class NotifyResponse {
-    Long id;
-    Long userId;
-    String title;
-    Boolean send;
-    String body;
-    LocalDate date;
+public class PageResponse<T> {
+    private List<T> content;
+    private int pageNumber;
+    private int pageSize;
+    private long totalElements;
+    private int totalPages;
 }
+

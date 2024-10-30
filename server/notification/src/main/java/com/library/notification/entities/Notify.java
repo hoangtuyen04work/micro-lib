@@ -8,8 +8,6 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @AllArgsConstructor
@@ -18,7 +16,7 @@ import java.util.List;
 @Getter
 @Setter
 @Builder
-public class ReturnNotify {
+public class Notify {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
@@ -26,4 +24,5 @@ public class ReturnNotify {
     String body;
     Long userId;
     LocalDate date;
+    Boolean send;
 }

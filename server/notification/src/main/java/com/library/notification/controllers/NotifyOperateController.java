@@ -4,8 +4,8 @@ import com.library.notification.dtos.ApiResponse;
 import com.library.kafkaObject.BorrowNotificationRequest;
 import com.library.kafkaObject.ReturnNotificationRequest;
 import com.library.notification.dtos.responses.NotifyResponse;
-import com.library.notification.services.impl.BorrowNotifyServiceImpl;
-import com.library.notification.services.impl.ReturnNotifyServiceImpl;
+import com.library.notification.services.BorrowNotifyService;
+import com.library.notification.services.ReturnNotifyService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -19,10 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RestController()
 @RequiredArgsConstructor
-public class NotifyController {
+public class NotifyOperateController {
     SimpMessagingTemplate simpMessagingTemplate;
-    BorrowNotifyServiceImpl borrowNotifyService;
-    ReturnNotifyServiceImpl returnNotifyService;
+    BorrowNotifyService borrowNotifyService;
+    ReturnNotifyService returnNotifyService;
     @Value("${websocket.sendTo}")
     @NonFinal
     String sendTo;
