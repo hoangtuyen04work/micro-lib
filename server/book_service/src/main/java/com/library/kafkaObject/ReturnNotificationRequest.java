@@ -1,4 +1,4 @@
-package com.library.notification.dtos.requests;
+package com.library.kafkaObject;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class BorrowNotificationRequest {
+public class ReturnNotificationRequest {
     List<String> bookName;
     Long userId;
     LocalDate borrowTime;

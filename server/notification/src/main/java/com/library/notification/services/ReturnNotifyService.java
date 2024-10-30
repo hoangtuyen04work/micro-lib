@@ -1,6 +1,6 @@
 package com.library.notification.services;
 
-import com.library.notification.dtos.requests.ReturnNotificationRequest;
+import com.library.kafkaObject.ReturnNotificationRequest;
 import com.library.notification.dtos.responses.NotifyResponse;
 import com.library.notification.entities.ReturnNotify;
 

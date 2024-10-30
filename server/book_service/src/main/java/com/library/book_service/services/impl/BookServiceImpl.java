@@ -1,10 +1,9 @@
 package com.library.book_service.services.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.library.book_service.dtos.requests.BookRequest;
-import com.library.book_service.dtos.requests.BorrowNotificationRequest;
+import com.library.kafkaObject.BorrowNotificationRequest;
 import com.library.book_service.dtos.requests.NewBookRequest;
-import com.library.book_service.dtos.requests.ReturnNotificationRequest;
+import com.library.kafkaObject.ReturnNotificationRequest;
 import com.library.book_service.dtos.responses.BookResponse;
 import com.library.book_service.dtos.responses.BookResponseSimple;
 import com.library.book_service.dtos.responses.PageResponse;
@@ -32,9 +31,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)

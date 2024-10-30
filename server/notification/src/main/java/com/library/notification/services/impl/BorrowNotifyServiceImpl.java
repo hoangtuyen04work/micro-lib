@@ -1,6 +1,6 @@
 package com.library.notification.services.impl;
 
-import com.library.notification.dtos.requests.BorrowNotificationRequest;
+import com.library.kafkaObject.BorrowNotificationRequest;
 import com.library.notification.dtos.responses.NotifyResponse;
 import com.library.notification.entities.BorrowNotify;
 import com.library.notification.repositories.BorrowNotifyRepo;

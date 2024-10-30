@@ -1,14 +1,11 @@
 package com.library.book_service.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.library.book_service.dtos.requests.BookRequest;
 import com.library.book_service.dtos.requests.NewBookRequest;
 import com.library.book_service.dtos.responses.BookResponse;
 import com.library.book_service.dtos.responses.BookResponseSimple;
 import com.library.book_service.dtos.responses.PageResponse;
-import com.library.book_service.entities.Book;
 import com.library.book_service.exceptions.AppException;
-import org.springframework.data.domain.Page;
 
 import java.util.List;
 
