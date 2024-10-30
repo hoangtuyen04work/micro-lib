@@ -30,13 +30,16 @@ public class RatingServiceImpl implements RatingService {
     public RatingResponse rateBook(RatingRequest request) {
         Optional<Rating> rate = ratingRepo.findByUserIdAndBookId(request.getUserId(), request.getBookId());
         if(rate.isPresent()) {
-            Rating rating = rate.get(); rating.setRating(request.getRating());
+            Rating rating = rate.get();
+            rating.setRating(request.getRating());
+            rating.setComment(request.getComment());
             return toRatingResponse(ratingRepo.save(rating));
         }
         Rating rating = Rating.builder()
                 .userId(request.getUserId())
                 .bookId(request.getBookId())
                 .rating(request.getRating())
+                .userName(request.getUserName())
                 .comment(request.getComment())
                 .build();
         return toRatingResponse(ratingRepo.save(rating));
@@ -98,6 +101,7 @@ public class RatingServiceImpl implements RatingService {
     public RatingResponse toRatingResponse(Rating rating) {
         return RatingResponse.builder()
                 .id(rating.getId())
+                .userName(rating.getUserName())
                 .userId(rating.getUserId())
                 .bookId(rating.getBookId())
                 .rating(rating.getRating())

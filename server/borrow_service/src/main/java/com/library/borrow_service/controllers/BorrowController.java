@@ -2,7 +2,6 @@ package com.library.borrow_service.controllers;
 
 import com.library.borrow_service.dtos.ApiResponse;
 import com.library.borrow_service.dtos.responses.BorrowResponse;
-import com.library.borrow_service.services.BorrowService;
 import com.library.borrow_service.services.impl.BorrowServiceImpl;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -17,13 +16,13 @@ import java.util.List;
 public class BorrowController {
     BorrowServiceImpl borrowService;
 
-
     @PutMapping("/borrow/{userId}")
     public ApiResponse<Boolean> borrowBook(@RequestBody List<Long> ids, @PathVariable Long userId) {
         return ApiResponse.<Boolean>builder()
                 .data(borrowService.borrowBook(ids, userId))
                 .build();
     }
+
     @PutMapping("/borrow/{userId}/{bookId}")
     public ApiResponse<Boolean> borrowBook(@PathVariable Long bookId, @PathVariable Long userId) {
         return ApiResponse.<Boolean>builder()
@@ -53,5 +52,4 @@ public class BorrowController {
                 .data(borrowService.check(userId, bookId))
                 .build();
     }
-
 }

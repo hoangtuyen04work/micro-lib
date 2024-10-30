@@ -19,13 +19,13 @@ public interface BookService {
 
     PageResponse<BookResponseSimple> search(String name, Integer size, Integer page) throws JsonProcessingException;
 
-    Boolean returnBook(List<Long> bookIds);
+    Boolean returnBook(List<Long> bookIds, Long userId);
 
-    String returnBook(Long id);
+    String returnBook(Long id, Long userId);
 
-    Boolean borrow(List<Long> ids);
+    Boolean borrow(List<Long> ids, Long userId);
 
-    String borrow(Long id) throws AppException, JsonProcessingException;
+    String borrow(Long id, Long userId) throws AppException, JsonProcessingException;
 
     List<Long> getNumbers(List<Long> ids) throws JsonProcessingException;
 
@@ -41,21 +41,4 @@ public interface BookService {
 
     BookResponse createBook(NewBookRequest request);
 
-    List<BookResponse> toBookResponses(List<Book> books);
-
-    PageResponse<BookResponseSimple> toPageResponseSimple(Page<Book> books);
-
-    PageResponse<BookResponse> toPageResponse(Page<Book> books);
-
-    List<BookResponseSimple> toBookResponseSimple(List<Book> request);
-
-    PageResponse<BookResponseSimple> toBookResponseSimple(Page<Book> request);
-
-    BookResponseSimple toBookResponseSimple(Book request);
-
-    Book toBook(NewBookRequest request);
-
-    Book toBook(BookRequest request);
-
-    BookResponse toBookResponse(Book request);
 }

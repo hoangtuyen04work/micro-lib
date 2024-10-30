@@ -22,7 +22,6 @@ public class BookRedisServiceImpl implements BookRedisService {
     RedisTemplate<String, Object> redisTemplate;
     ObjectMapper objectMapper;
 
-
     @Override
     public PageResponse<BookResponseSimple> getTop(Integer typeId, Integer size, Integer page) throws JsonProcessingException {
         String key = "getTop:" + "typeId_" + typeId + " size:" + size + " page:" + page;

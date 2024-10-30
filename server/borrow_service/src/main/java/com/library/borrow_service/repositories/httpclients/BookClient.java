@@ -11,12 +11,12 @@ import java.util.List;
         configuration =  {AuthenticationRequestInterceptor.class})
 public interface BookClient {
 
-    @PostMapping("/book/borrows")
-    ApiResponse<Boolean> borrow(@RequestBody List<Long> id);
+    @PostMapping("/book/borrows/{userId}")
+    ApiResponse<Boolean> borrow(@RequestBody List<Long> id, @PathVariable Long userId);
 
-    @PostMapping("/book/borrow")
-    ApiResponse<Boolean> borrow(@RequestBody Long id);
+    @PostMapping("/book/borrow/{userId}")
+    ApiResponse<Boolean> borrow(@RequestBody Long id, @PathVariable Long userId);
 
-    @PutMapping("/book/return")
-    ApiResponse<Boolean> returnBook(@RequestBody List<Long> bookIds);
+    @PutMapping("/book/return/{userId}")
+    ApiResponse<Boolean> returnBook(@RequestBody List<Long> bookIds, @PathVariable Long userId);
 }

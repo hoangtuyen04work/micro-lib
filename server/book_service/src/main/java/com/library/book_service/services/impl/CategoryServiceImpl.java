@@ -5,6 +5,7 @@ import com.library.book_service.dtos.responses.CategoryResponse;
 import com.library.book_service.entities.Category;
 import com.library.book_service.repositories.CategoryRepo;
 import com.library.book_service.services.CategoryService;
+import com.library.book_service.util.Mapping;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
+    Mapping mapping;
     CategoryRepo categoryRepo;
 
     @Override
@@ -41,41 +43,13 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<CategoryResponse> getALl(){
-        return categoryRepo.findAll().stream().map(this::toCategoryResponse).collect(Collectors.toList());
+        return categoryRepo.findAll().stream().map(mapping::toCategoryResponse).collect(Collectors.toList());
     }
 
     @Override
     public CategoryResponse createCategory(CategoryRequest request){
-        return toCategoryResponse(categoryRepo.save(toCategory(request)));
+        return mapping.toCategoryResponse(categoryRepo.save(mapping.toCategory(request)));
     }
 
-    @Override
-    public List<CategoryResponse> toCategoryResponses(List<Category> categories) {
-        return categories.stream()
-                .map(this::toCategoryResponse)
-                .collect(Collectors.toList());
-    }
 
-    @Override
-    public CategoryResponse toCategoryResponse(Category category){
-        return CategoryResponse.builder()
-                .category(category.getCategory())
-                .id(category.getId())
-                .build();
-    }
-
-    @Override
-    public List<Category> toCategories(List<CategoryRequest> request){
-        return request.stream()
-                .map(this::toCategory)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public Category toCategory(CategoryRequest request){
-        return Category.builder()
-                .category(request.getCategory())
-                .id(request.getId())
-                .build();
-    }
 }

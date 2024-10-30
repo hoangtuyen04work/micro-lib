@@ -14,6 +14,8 @@ public class RatingRequest {
 
     Long userId;
 
+    String userName;
+
     Long bookId;
 
     Integer rating;

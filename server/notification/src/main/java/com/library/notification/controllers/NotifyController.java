@@ -13,7 +13,6 @@ import lombok.experimental.NonFinal;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -27,19 +26,21 @@ public class NotifyController {
     @NonFinal
     String sendTo;
 
-    @KafkaListener(topics = "${kafka.return}", groupId = "${kafka.groupId}")
-    public void returnNotify(@RequestBody ReturnNotificationRequest request) {
-        simpMessagingTemplate.convertAndSend(sendTo, ApiResponse.<NotifyResponse>builder()
+    @KafkaListener(topics = "${kafka.return}", groupId = "${kafka.groupId1}")
+    public void returnNotify( ReturnNotificationRequest request) {
+        System.err.println(request.getUserId());
+        simpMessagingTemplate.convertAndSend(sendTo + "/" + request.getUserId().toString(),
+                                            ApiResponse.<NotifyResponse>builder()
                 .data(returnNotifyService.returnNotify(request))
                 .build());
     }
 
-    @KafkaListener(topics = "${kafka.borrow}", groupId = "${kafka.groupId}")
-    public void borrowNotify(@RequestBody BorrowNotificationRequest request) {
-        simpMessagingTemplate.convertAndSend(sendTo, ApiResponse.<NotifyResponse>builder()
+    @KafkaListener(topics = "${kafka.borrow}", groupId = "${kafka.groupId2}")
+    public void borrowNotify( BorrowNotificationRequest request) {
+        System.err.println(request.getUserId());
+        simpMessagingTemplate.convertAndSend(sendTo + "/" + request.getUserId().toString(),
+                                            ApiResponse.<NotifyResponse>builder()
                 .data(borrowNotifyService.borrowNotify(request))
                 .build());
     }
-
-
 }

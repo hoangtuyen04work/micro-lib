@@ -22,7 +22,7 @@ public class BorrowServiceImpl implements BorrowService {
 
     @Override
     public boolean borrowBook(List<Long> bookIds, Long userId) {
-        bookClient.borrow(bookIds);
+        bookClient.borrow(bookIds, userId);
         List<String> name = new ArrayList<>();
         for (Long bookId : bookIds) {
             Borrow borrow = Borrow.builder()
@@ -39,7 +39,7 @@ public class BorrowServiceImpl implements BorrowService {
 
     @Override
     public boolean borrowBook(Long bookId, Long userId) {
-        bookClient.borrow(bookId);
+        bookClient.borrow(bookId, userId);
         List<String> name = new ArrayList<>();
             Borrow borrow = Borrow.builder()
                     .bookId(bookId)
@@ -55,7 +55,7 @@ public class BorrowServiceImpl implements BorrowService {
 
     @Override
     public boolean returnBooks(List<Long> bookId, Long userId) {
-        bookClient.returnBook(bookId);
+        bookClient.returnBook(bookId, userId);
         return true;
     }
 

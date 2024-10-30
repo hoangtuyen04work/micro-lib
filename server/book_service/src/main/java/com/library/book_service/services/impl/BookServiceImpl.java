@@ -16,6 +16,7 @@ import com.library.book_service.repositories.httpclient.AmazonS3Client;
 import com.library.book_service.services.BookRedisService;
 import com.library.book_service.services.BookService;
 import com.library.book_service.services.CategoryService;
+import com.library.book_service.util.Mapping;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -39,6 +40,7 @@ import java.util.stream.Collectors;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor
 public class BookServiceImpl implements BookService{
+    Mapping mapping;
     BookRepo bookRepo;
     CategoryService categoryService;
     AmazonS3Client amazonS3Client;
@@ -59,12 +61,12 @@ public class BookServiceImpl implements BookService{
        Pageable pageable = PageRequest.of(Math.toIntExact(page - 1), Math.toIntExact(size), Sort.by("numberBorrowed").descending());
        PageResponse<BookResponseSimple> response;
        if(typeId == 0){
-           response =  toBookResponseSimple(bookRepo.findAll(pageable));
+           response =  mapping.toBookResponseSimple(bookRepo.findAll(pageable));
            bookRedisService.saveGetTop(typeId, size, page, response);
            return response;
        }
        else{
-           response =  toBookResponseSimple(bookRepo.findByCategoriesIn(List.of(categoryService.findById(Long.valueOf(typeId))), pageable));
+           response =  mapping.toBookResponseSimple(bookRepo.findByCategoriesIn(List.of(categoryService.findById(Long.valueOf(typeId))), pageable));
            bookRedisService.saveGetTop(typeId, size, page, response);
            return response;
        }
@@ -75,7 +77,7 @@ public class BookServiceImpl implements BookService{
         List<BookResponse> responses;
         responses = bookRedisService.getAll();
         if(responses != null) return responses;
-        responses = bookRepo.findAll().stream().map(this::toBookResponse).toList();
+        responses = bookRepo.findAll().stream().map(mapping::toBookResponse).toList();
         bookRedisService.saveGetAll(responses);
         return responses;
     }
@@ -87,26 +89,27 @@ public class BookServiceImpl implements BookService{
         if(responses != null) return responses;
         Pageable pageable = PageRequest.of(page - 1, size);
         Page<Book> books = bookRepo.findByNameContaining(name, pageable);
-        PageResponse<BookResponseSimple> response = toPageResponseSimple(books);
+        PageResponse<BookResponseSimple> response = mapping.toPageResponseSimple(books);
         bookRedisService.saveSearch(name, size, page, response);
         return response;
     }
 
     @Override
-    public Boolean returnBook(List<Long> bookIds){
+    public Boolean returnBook(List<Long> bookIds, Long userId){
         List<String> name = new ArrayList<>();
         for(Long id : bookIds){
-            name.add(returnBook(id));
+            name.add(returnBook(id, userId));
         }
         kafkaBorrow.send(borrowTopic, BorrowNotificationRequest.builder()
                         .bookName(name)
+                        .userId(userId)
                         .borrowTime(LocalDate.now())
                 .build());
         return true;
     }
 
     @Override
-    public String returnBook(Long id){
+    public String returnBook(Long id, Long userId){
         Book book = bookRepo.findById(id).get();
         Long number = book.getNumber();
         book.setNumber(number + 1);
@@ -115,24 +118,30 @@ public class BookServiceImpl implements BookService{
     }
 
     @Override
-    public Boolean borrow(List<Long> ids){
+    public Boolean borrow(List<Long> ids, Long userId){
         List<String> name = new ArrayList<>();
         for(Long id : ids){
-            name.add(borrow(id));
+            name.add(borrow(id, userId));
         }
         kafkaReturn.send(returnTopic, ReturnNotificationRequest.builder()
                         .bookName(name)
+                        .userId(userId)
                         .borrowTime(LocalDate.now())
                 .build());
         return true;
     }
 
     @Override
-    public String borrow(Long id){
+    public String borrow(Long id, Long userId){
         Book book = bookRepo.findById(id).get();
         book.setNumberBorrowed((book.getNumberBorrowed() == null ? 0 : book.getNumberBorrowed()) + 1);
         book.setNumber(book.getNumber() - 1);
         bookRepo.save(book);
+        kafkaReturn.send(returnTopic, ReturnNotificationRequest.builder()
+                .bookName(List.of(book.getName()))
+                .userId(userId)
+                .borrowTime(LocalDate.now())
+                .build());
         return book.getName();
     }
 
@@ -171,7 +180,7 @@ public class BookServiceImpl implements BookService{
             book.add(bookRepo.findById(id).get());
         }
         if(book.isEmpty()) throw new AppException(ErrorCode.NOT_EXIST_BOOK);
-        List<BookResponse> response = book.stream().map(this::toBookResponse).toList();
+        List<BookResponse> response = book.stream().map(mapping::toBookResponse).toList();
         bookRedisService.saveGetBook(ids,response);
         return response;
     }
@@ -183,32 +192,21 @@ public class BookServiceImpl implements BookService{
         }
         Optional<Book> book = bookRepo.findById(id);
         if(book.isEmpty()) throw new AppException(ErrorCode.NOT_EXIST_BOOK);
-        BookResponse response = toBookResponse(book.get());
+        BookResponse response = mapping.toBookResponse(book.get());
         bookRedisService.saveGetBook(id,response);
         return response;
     }
-
 
     @Override
     public BookResponse updateBook(Long id, NewBookRequest updated){
         Optional<Book> optionalBook = bookRepo.findById(id);
         if (optionalBook.isEmpty())
             throw new RuntimeException("Book not found with id: " + id);
-        Book book = optionalBook.get();
-        book.setBookCode(updated.getBookCode());
-        book.setCategories(categoryService.findByIds(updated.getCategories()));
-        book.setAuthor(updated.getAuthor());
-        book.setEdition(updated.getEdition());
-        book.setNumberPage(updated.getNumberPage());
-        book.setName(updated.getName());
-        book.setNumber(updated.getNumber());
-        book.setPrice(updated.getPrice());
-        book.setPublicationDate(updated.getPublicationDate());
-        book.setShortDescription(updated.getShortDescription());
+        String imageUrl = null;
         if(updated.getImage() != null){
-            book.setImageUrl(amazonS3Client.uploadImage(updated.getImage()));
+            imageUrl = amazonS3Client.uploadImage(updated.getImage());
         }
-        return toBookResponse(bookRepo.save(book));
+        return mapping.toBookResponse(bookRepo.save(optionalBook.get()), updated, imageUrl);
     }
 
     @Override
@@ -219,122 +217,12 @@ public class BookServiceImpl implements BookService{
     //CreateBook
     @Override
     public BookResponse createBook(NewBookRequest request){
-        Book book = toBook(request);
+        Book book = mapping.toBook(request);
         book.setCategories(categoryService.findByIds(request.getCategories()));
         book.setImageUrl(amazonS3Client.uploadImage(request.getImage()));
         book.setNumberBorrowed(0L);
-        return toBookResponse(bookRepo.save(book));
+        return mapping.toBookResponse(bookRepo.save(book));
     }
 
-    @Override
-    public List<BookResponse> toBookResponses(List<Book> books){
-        return books.stream().map(this::toBookResponse).collect(Collectors.toList());
-    }
 
-    @Override
-    public PageResponse<BookResponseSimple> toPageResponseSimple(Page<Book> books){
-        return PageResponse.<BookResponseSimple>builder()
-                .totalPages(books.getTotalPages())
-                .content(toBookResponseSimple(books.getContent()))
-                .pageSize(books.getSize())
-                .totalElements(books.getTotalElements())
-                .pageNumber(books.getNumber())
-                .build();
-    }
-
-    @Override
-    public PageResponse<BookResponse> toPageResponse(Page<Book> books){
-        return PageResponse.<BookResponse>builder()
-                .totalPages(books.getTotalPages())
-                .content(toBookResponses(books.getContent()))
-                .pageSize(books.getSize())
-                .totalElements(books.getTotalElements())
-                .pageNumber(books.getNumber())
-                .build();
-    }
-
-    @Override
-    public List<BookResponseSimple> toBookResponseSimple(List<Book> request){
-        return request.stream().map(this::toBookResponseSimple).toList();
-    }
-
-    @Override
-    public PageResponse<BookResponseSimple> toBookResponseSimple(Page<Book> request){
-        return PageResponse.<BookResponseSimple>builder()
-                .pageNumber(request.getNumber())
-                .totalElements(request.getTotalElements())
-                .pageSize(request.getSize())
-                .content(request.getContent().stream().map(this::toBookResponseSimple).toList())
-                .build();
-    }
-
-    @Override
-    public BookResponseSimple toBookResponseSimple(Book request){
-        return BookResponseSimple.builder()
-                .id(request.getId())
-                .imageUrl(request.getImageUrl())
-                .name(request.getName())
-                .numberBorrowed(request.getNumberBorrowed())
-                .build();
-    }
-
-    //convert NewBookRequest to Book
-    @Override
-    public Book toBook(NewBookRequest request){
-        return Book.builder()
-                .number(request.getNumber())
-                .numberBorrowed(0L)
-                .id(request.getId())
-                .bookCode(request.getBookCode())
-                .name(request.getName())
-                .author(request.getAuthor())
-                .categories(categoryService.toCategories(request.getCategories()))
-                .price(request.getPrice())
-                .language(request.getLanguage())
-                .shortDescription(request.getShortDescription())
-                .numberPage(request.getNumberPage())
-                .publicationDate(request.getPublicationDate())
-                .edition(request.getEdition())
-                .build();
-    }
-
-    @Override
-    public Book toBook(BookRequest request){
-        return Book.builder()
-                .id(request.getId())
-                .bookCode(request.getBookCode())
-                .name(request.getName())
-                .author(request.getAuthor())
-                .number(request.getNumber())
-                .categories(categoryService.toCategories(request.getCategories()))
-                .imageUrl(request.getImageUrl())
-                .price(request.getPrice())
-                .language(request.getLanguage())
-                .shortDescription(request.getShortDescription())
-                .numberPage(request.getNumberPage())
-                .publicationDate(request.getPublicationDate())
-                .edition(request.getEdition())
-                .numberBorrowed(request.getNumberBorrowed())
-                .build();
-    }
-
-    @Override
-    public BookResponse toBookResponse(Book request){
-        return BookResponse.builder()
-                .id(request.getId())
-                .numberBorrowed(request.getNumberBorrowed())
-                .bookCode(request.getBookCode())
-                .name(request.getName())
-                .number(request.getNumber())
-                .author(request.getAuthor())
-                .categories(categoryService.toCategoryResponses(request.getCategories()))
-                .price(request.getPrice())
-                .imageUrl(request.getImageUrl())
-                .language(request.getLanguage())
-                .shortDescription(request.getShortDescription())
-                .numberPage(request.getNumberPage())
-                .publicationDate(request.getPublicationDate())
-                .edition(request.getEdition())
-                .build();
-    }
 }

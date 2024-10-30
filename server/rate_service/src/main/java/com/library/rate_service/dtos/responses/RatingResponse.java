@@ -18,6 +18,8 @@ public class RatingResponse {
 
     Long userId;
 
+    String userName;
+
     Long bookId;
 
     Integer rating;

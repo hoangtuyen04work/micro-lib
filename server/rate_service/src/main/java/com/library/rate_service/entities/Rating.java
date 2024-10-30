@@ -24,6 +24,8 @@ public class Rating {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
+    String userName;
+
     Long userId;
 
     Long bookId;

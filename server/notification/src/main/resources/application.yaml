@@ -3,11 +3,12 @@ jwt:
 kafka:
   borrow: "borrow"
   return: "return"
-  groupId: "notification"
+  groupId1: "notification"
+  groupId2: "notification2"
 websocket:
-  simpleBroker: "/notify"
-  prefix: "/notify"
-  endpoint: "/websocket"
+  simpleBroker: "/notify/receiver"
+  prefix: "/app"
+  endpoint: "/notify/websocket"
   sendTo: "/notify/receiver"
 server:
   port: 8087

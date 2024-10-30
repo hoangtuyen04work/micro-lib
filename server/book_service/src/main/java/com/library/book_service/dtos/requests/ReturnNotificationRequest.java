@@ -14,6 +14,6 @@ import java.util.List;
 @Builder
 public class ReturnNotificationRequest {
     List<String> bookName;
-    String userId;
+    Long userId;
     LocalDate borrowTime;
 }

@@ -32,9 +32,9 @@ public class BookController {
                 .build();
     }
 
-    @PutMapping("/return")
-    public ApiResponse<Boolean> returnBook(@RequestBody List<Long> bookIds){
-        bookService.returnBook(bookIds);
+    @PutMapping("/return/{userId}")
+    public ApiResponse<Boolean> returnBook(@RequestBody List<Long> bookIds, @PathVariable Long userId){
+        bookService.returnBook(bookIds, userId);
         return ApiResponse.<Boolean>builder()
                 .data(true)
                 .build();
@@ -47,17 +47,17 @@ public class BookController {
                 .build();
     }
 
-    @PostMapping("/borrows")
-    public ApiResponse<Boolean> borrow(@RequestBody List<Long> id){
-        bookService.borrow(id);
+    @PostMapping("/borrows/{userId}")
+    public ApiResponse<Boolean> borrow(@RequestBody List<Long> id, @PathVariable Long userId){
+        bookService.borrow(id, userId);
         return ApiResponse.<Boolean>builder()
                 .data(true)
                 .build();
     }
 
-    @PostMapping("/borrow")
-    public ApiResponse<Boolean> borrow(@RequestBody Long id){
-        bookService.borrow(id);
+    @PostMapping("/borrow/{userId}")
+    public ApiResponse<Boolean> borrow(@RequestBody Long id, @PathVariable Long userId){
+        bookService.borrow(id, userId);
         return ApiResponse.<Boolean>builder()
                 .data(true)
                 .build();
