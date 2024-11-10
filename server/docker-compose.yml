@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+  database:
+    image: mysql:8
+    container_name: database
+    environment:
+      MYSQL_ROOT_PASSWORD: 12345678
+      MYSQL_DATABASE: demo
+    ports:
+      - "3303:3306"
+    networks:
+      - spring_net
+    restart: always
+  backend:
+    build: ./auth_service
+    container_name: backend
+    environment:
+      - DATABASE_HOST=database
+      - DATABASE_NAME=demo
+    ports:
+      - "8080:8080"
+    networks:
+      - spring_net
+    depends_on:
+      - database
+    restart: always
+networks:
+  spring_net:

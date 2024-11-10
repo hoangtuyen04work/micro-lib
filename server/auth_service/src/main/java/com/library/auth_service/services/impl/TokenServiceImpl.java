@@ -13,6 +13,7 @@ import com.library.auth_service.exceptions.AppException;
 import com.library.auth_service.exceptions.ErrorCode;
 import com.library.auth_service.repositories.TokenRepo;
 import com.library.auth_service.services.TokenService;
+import com.library.auth_service.utils.Mapping;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
@@ -42,6 +43,7 @@ public class TokenServiceImpl implements TokenService {
     @Value("${jwt.signerKey}")
     @NonFinal
     String signerKey;
+    Mapping mapping;
 
     @Override
     @Transactional
@@ -60,15 +62,7 @@ public class TokenServiceImpl implements TokenService {
         }
         Token token = createToken(user);
         tokenRepo.save(token);
-        return AuthResponse.builder()
-                .id(user.getId())
-                .token(token.getToken())
-                .name(user.getName())
-                .phone(user.getPhone())
-                .email(user.getEmail())
-                .imageUrl(user.getImageUrl())
-                .refreshToken(token.getRefreshToken())
-                .build();
+        return mapping.toAuthResponse(user, token);
     }
 
     @Override
@@ -76,15 +70,7 @@ public class TokenServiceImpl implements TokenService {
         User user = userServiceImpl.createUser(request);
         Token token = createToken(user);
         tokenRepo.save(token);
-        return AuthResponse.builder()
-                .id(user.getId())
-                .token(token.getToken())
-                .imageUrl(user.getImageUrl())
-                .phone(user.getPhone())
-                .email(user.getEmail())
-                .name(user.getName())
-                .refreshToken(token.getRefreshToken())
-                .build();
+        return mapping.toAuthResponse(user, token);
     }
 
     @Override

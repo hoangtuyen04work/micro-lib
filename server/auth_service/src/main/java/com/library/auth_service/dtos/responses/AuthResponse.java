@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 @Builder
@@ -20,4 +21,5 @@ public class AuthResponse {
     String imageUrl;
     String token;
     String refreshToken;
+    List<RoleResponse> roles;
 }

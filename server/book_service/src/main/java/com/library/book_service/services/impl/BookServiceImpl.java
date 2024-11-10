@@ -1,9 +1,8 @@
 package com.library.book_service.services.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.library.kafkaObject.BorrowNotificationRequest;
+import com.library.book_service.services.KafkaService;
 import com.library.book_service.dtos.requests.NewBookRequest;
-import com.library.kafkaObject.ReturnNotificationRequest;
 import com.library.book_service.dtos.responses.BookResponse;
 import com.library.book_service.dtos.responses.BookResponseSimple;
 import com.library.book_service.dtos.responses.PageResponse;
@@ -18,17 +17,14 @@ import com.library.book_service.services.CategoryService;
 import com.library.book_service.util.Mapping;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
-import lombok.experimental.NonFinal;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -42,37 +38,29 @@ public class BookServiceImpl implements BookService{
     CategoryService categoryService;
     AmazonS3Client amazonS3Client;
     BookRedisService bookRedisService;
-    KafkaTemplate<String, ReturnNotificationRequest> kafkaReturn;
-    KafkaTemplate<String, BorrowNotificationRequest> kafkaBorrow;
-    @NonFinal
-    @Value("${kafka.return}")
-    String returnTopic;
-    @Value("${kafka.borrow}")
-    @NonFinal
-    String borrowTopic;
+    KafkaService kafkaService;
 
     @Override
     public PageResponse<BookResponseSimple> getTop(Integer size, Integer page, Integer typeId) throws JsonProcessingException {
         PageResponse<BookResponseSimple> responses = bookRedisService.getTop(typeId, size, page);
         if(responses != null) return responses;
-       Pageable pageable = PageRequest.of(Math.toIntExact(page - 1), Math.toIntExact(size), Sort.by("numberBorrowed").descending());
-       PageResponse<BookResponseSimple> response;
-       if(typeId == 0){
+        Pageable pageable = PageRequest.of(
+               Math.toIntExact(page - 1), Math.toIntExact(size), Sort.by("numberBorrowed").descending());
+        PageResponse<BookResponseSimple> response;
+        if(typeId == 0){
            response =  mapping.toBookResponseSimple(bookRepo.findAll(pageable));
-           bookRedisService.saveGetTop(typeId, size, page, response);
-           return response;
-       }
-       else{
-           response =  mapping.toBookResponseSimple(bookRepo.findByCategoriesIn(List.of(categoryService.findById(Long.valueOf(typeId))), pageable));
-           bookRedisService.saveGetTop(typeId, size, page, response);
-           return response;
-       }
+        }
+        else{
+           response =  mapping.toBookResponseSimple(bookRepo.findByCategoriesIn(
+                   List.of(categoryService.findById(Long.valueOf(typeId))), pageable));
+        }
+        bookRedisService.saveGetTop(typeId, size, page, response);
+        return response;
     }
 
     @Override
     public List<BookResponse> getAll() throws JsonProcessingException {
-        List<BookResponse> responses;
-        responses = bookRedisService.getAll();
+        List<BookResponse> responses = bookRedisService.getAll();
         if(responses != null) return responses;
         responses = bookRepo.findAll().stream().map(mapping::toBookResponse).toList();
         bookRedisService.saveGetAll(responses);
@@ -92,89 +80,75 @@ public class BookServiceImpl implements BookService{
     }
 
     @Override
-    public Boolean returnBook(List<Long> bookIds, Long userId){
-        List<String> name = new ArrayList<>();
+    public void returnBook(List<Long> bookIds, Long userId) throws AppException {
         for(Long id : bookIds){
-            name.add(returnBook(id, userId));
+            returnBook(id, userId);
         }
-        kafkaBorrow.send(borrowTopic, BorrowNotificationRequest.builder()
-                        .bookName(name)
-                        .userId(userId)
-                        .borrowTime(LocalDate.now())
-                .build());
-        return true;
     }
 
     @Override
-    public String returnBook(Long id, Long userId){
-        Book book = bookRepo.findById(id).get();
+    public void returnBook(Long id, Long userId) throws AppException {
+        Book book = findById(id);
         Long number = book.getNumber();
         book.setNumber(number + 1);
         bookRepo.save(book);
-        return book.getName();
+        kafkaService.returnNotify(id, userId, book.getName());
     }
 
     @Override
-    public Boolean borrow(List<Long> ids, Long userId){
-        List<String> name = new ArrayList<>();
+    public void borrow(List<Long> ids, Long userId) throws AppException {
         for(Long id : ids){
-            name.add(borrow(id, userId));
+            borrow(id, userId);
         }
-        kafkaReturn.send(returnTopic, ReturnNotificationRequest.builder()
-                        .bookName(name)
-                        .userId(userId)
-                        .borrowTime(LocalDate.now())
-                .build());
-        return true;
     }
 
     @Override
-    public String borrow(Long id, Long userId){
-        Book book = bookRepo.findById(id).get();
+    public void borrow(Long id, Long userId) throws AppException {
+        Book book = findById(id);
         book.setNumberBorrowed((book.getNumberBorrowed() == null ? 0 : book.getNumberBorrowed()) + 1);
         book.setNumber(book.getNumber() - 1);
         bookRepo.save(book);
-        kafkaReturn.send(returnTopic, ReturnNotificationRequest.builder()
-                .bookName(List.of(book.getName()))
-                .userId(userId)
-                .borrowTime(LocalDate.now())
-                .build());
-        return book.getName();
+        kafkaService.borrowNotify(id, userId, book.getName());
     }
 
     @Override
-    public List<Long> getNumbers(List<Long> ids) throws JsonProcessingException {
+    public List<Long> getNumbers(List<Long> ids) throws JsonProcessingException, AppException {
         if(bookRedisService.getNumbers(ids) != null){
             return bookRedisService.getNumbers(ids);
         }
         List<Book> books = new ArrayList<>();
         for(Long id : ids){
-            books.add(bookRepo.findById(id).get());
+            books.add(findById(id));
         }
-        List<Long> id = new ArrayList<>();
-        for (Book book : books) id.add(book.getNumber());
+        List<Long> id = books.stream().map(Book::getNumber).toList();
         bookRedisService.saveGetNumbers(ids, id);
         return id;
     }
 
     @Override
-    public Long getNumberById(Long id) throws JsonProcessingException {
+    public Long getNumberById(Long id) throws JsonProcessingException, AppException {
         if(bookRedisService.getNumberById(id) != null){
             return bookRedisService.getNumberById(id);
         }
-        Long number = bookRepo.findById(id).get().getNumber();
+        Book book = findById(id);
+        Long number = book.getNumber();
         bookRedisService.saveGetNumberById(id, number);
         return number;
     }
 
     @Override
-    public List<BookResponse> getById(List<Long> ids) throws JsonProcessingException, AppException {
+    public Book findById(Long id) throws AppException {
+        return checkOptional(bookRepo.findById(id));
+    }
+
+    @Override
+    public List<BookResponse> getByIds(List<Long> ids) throws JsonProcessingException, AppException {
         if(bookRedisService.get(ids) != null){
             return bookRedisService.get(ids);
         }
         List<Book> book = new ArrayList<>();
         for (Long id : ids){
-            book.add(bookRepo.findById(id).get());
+            book.add(findById(id));
         }
         if(book.isEmpty()) throw new AppException(ErrorCode.NOT_EXIST_BOOK);
         List<BookResponse> response = book.stream().map(mapping::toBookResponse).toList();
@@ -188,22 +162,19 @@ public class BookServiceImpl implements BookService{
             return bookRedisService.get(id);
         }
         Optional<Book> book = bookRepo.findById(id);
-        if(book.isEmpty()) throw new AppException(ErrorCode.NOT_EXIST_BOOK);
-        BookResponse response = mapping.toBookResponse(book.get());
+        BookResponse response = mapping.toBookResponse(checkOptional(book));
         bookRedisService.saveGetBook(id,response);
         return response;
     }
 
     @Override
-    public BookResponse updateBook(Long id, NewBookRequest updated){
+    public BookResponse updateBook(Long id, NewBookRequest updated) throws AppException {
         Optional<Book> optionalBook = bookRepo.findById(id);
-        if (optionalBook.isEmpty())
-            throw new RuntimeException("Book not found with id: " + id);
         String imageUrl = null;
         if(updated.getImage() != null){
             imageUrl = amazonS3Client.uploadImage(updated.getImage());
         }
-        return mapping.toBookResponse(bookRepo.save(optionalBook.get()), updated, imageUrl);
+        return mapping.toBookResponse(bookRepo.save(checkOptional(optionalBook)), updated, imageUrl);
     }
 
     @Override
@@ -221,5 +192,11 @@ public class BookServiceImpl implements BookService{
         return mapping.toBookResponse(bookRepo.save(book));
     }
 
-
+    @Override
+    public Book checkOptional(Optional<Book> book) throws AppException {
+        if(book.isEmpty()){
+            throw new AppException(ErrorCode.NOT_EXIST_BOOK);
+        }
+        return book.get();
+    }
 }

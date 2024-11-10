@@ -1,7 +1,5 @@
 package com.library.auth_service.services;
 
-import com.library.auth_service.dtos.requests.RoleRequest;
-import com.library.auth_service.dtos.responses.RoleResponse;
 import com.library.auth_service.entities.Role;
 
 import java.util.List;
@@ -14,11 +12,7 @@ public interface RoleService {
 
     Role createRole(Role role);
 
-    Role toRole(RoleRequest request);
+    Role findRole(String name);
 
-    RoleResponse toRoleResponse(Role role);
-
-    List<Role> toRoles(List<RoleRequest> request);
-
-    List<RoleResponse> toRoleResponses(List<Role> request);
+    List<Role> findRoles(List<String> request);
 }

@@ -4,13 +4,10 @@ FROM maven:3.9.9-amazoncorretto-21-alpine AS build
 # Thiết lập thư mục làm việc cho giai đoạn build
 WORKDIR /app
 
-# Copy file pom.xml và tải về các dependency trước
+# Copy file pom.xml và thư mục src
 COPY pom.xml .
-RUN mvn dependency:go-offline -B
-
-# Copy mã nguồn và thực hiện build
 COPY src ./src
-RUN mvn clean package -DskipTests
+
 
 # Run stage
 FROM amazoncorretto:21.0.5-al2023
@@ -22,7 +19,7 @@ WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 
 # Mở cổng 8080
-EXPOSE 8080
+EXPOSE 8086
 
 # Lệnh để khởi chạy ứng dụng
 ENTRYPOINT ["java", "-jar", "app.jar"]

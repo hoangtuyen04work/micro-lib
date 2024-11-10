@@ -5,9 +5,11 @@ import com.library.book_service.dtos.requests.NewBookRequest;
 import com.library.book_service.dtos.responses.BookResponse;
 import com.library.book_service.dtos.responses.BookResponseSimple;
 import com.library.book_service.dtos.responses.PageResponse;
+import com.library.book_service.entities.Book;
 import com.library.book_service.exceptions.AppException;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface BookService {
     PageResponse<BookResponseSimple> getTop(Integer size, Integer page, Integer typeId) throws JsonProcessingException;
@@ -16,26 +18,29 @@ public interface BookService {
 
     PageResponse<BookResponseSimple> search(String name, Integer size, Integer page) throws JsonProcessingException;
 
-    Boolean returnBook(List<Long> bookIds, Long userId);
+    void returnBook(List<Long> bookIds, Long userId) throws AppException;
 
-    String returnBook(Long id, Long userId);
+    void returnBook(Long id, Long userId) throws AppException;
 
-    Boolean borrow(List<Long> ids, Long userId);
+    void borrow(List<Long> ids, Long userId) throws AppException;
 
-    String borrow(Long id, Long userId) throws AppException, JsonProcessingException;
+    void borrow(Long id, Long userId) throws AppException, JsonProcessingException;
 
-    List<Long> getNumbers(List<Long> ids) throws JsonProcessingException;
+    List<Long> getNumbers(List<Long> ids) throws JsonProcessingException, AppException;
 
-    Long getNumberById(Long id) throws JsonProcessingException;
+    Long getNumberById(Long id) throws JsonProcessingException, AppException;
 
-    List<BookResponse> getById(List<Long> id) throws JsonProcessingException, AppException;
+    Book findById(Long id) throws AppException;
+
+    List<BookResponse> getByIds(List<Long> ids) throws JsonProcessingException, AppException;
 
     BookResponse getById(Long id) throws JsonProcessingException, AppException;
 
-    BookResponse updateBook(Long id, NewBookRequest updated);
+    BookResponse updateBook(Long id, NewBookRequest updated) throws AppException;
 
     void deleteBook(Long id);
 
     BookResponse createBook(NewBookRequest request);
 
+    Book checkOptional(Optional<Book> book) throws AppException;
 }

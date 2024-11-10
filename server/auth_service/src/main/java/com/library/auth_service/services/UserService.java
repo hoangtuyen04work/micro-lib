@@ -21,8 +21,4 @@ public interface UserService {
     User findUserById(Long id);
 
     User createUser(UserRequest request) throws AppException;
-
-    UserResponse toUserResponse(User user);
-
-    User toUser(UserRequest request);
 }

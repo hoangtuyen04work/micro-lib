@@ -1,7 +1,5 @@
 package com.library.auth_service.services.impl;
 
-import com.library.auth_service.dtos.requests.RoleRequest;
-import com.library.auth_service.dtos.responses.RoleResponse;
 import com.library.auth_service.entities.Role;
 import com.library.auth_service.repositories.RoleRepo;
 import com.library.auth_service.services.RoleService;
@@ -22,39 +20,28 @@ public class RoleServiceImpl implements RoleService {
     public Role getRole(String roleName) {
         return roleRepo.findByRoleName(roleName);
     }
+
     @Override
     public Role createRole(Role role) {
         return roleRepo.save(role);
     }
+
     @Override
     public List<Role> getAllRoles() {
         return roleRepo.findAll();
     }
-    @Override
-    public Role toRole(RoleRequest request){
 
-        return roleRepo.findByRoleName(request.getRoleName());
-    }
     @Override
-    public RoleResponse toRoleResponse(Role role){
-        return RoleResponse.builder()
-                .roleName(role.getRoleName())
-                .build();
+    public Role findRole(String name){
+        return roleRepo.findByRoleName(name);
     }
+
     @Override
-    public List<Role> toRoles(List<RoleRequest> request){
+    public List<Role> findRoles(List<String> request){
         List<Role> roles = new ArrayList<>();
-        for(RoleRequest r : request){
-            roles.add(toRole(r));
+        for(String r : request){
+            roles.add(findRole(r));
         }
         return roles;
-    }
-    @Override
-    public List<RoleResponse> toRoleResponses(List<Role> request){
-        List<RoleResponse> roleResponses = new ArrayList<>();
-        for(Role r : request){
-            roleResponses.add(toRoleResponse(r));
-        }
-        return roleResponses;
     }
 }

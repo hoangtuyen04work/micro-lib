@@ -6,7 +6,6 @@ import com.library.auth_service.dtos.requests.TokenRequest;
 import com.library.auth_service.dtos.requests.UserRequest;
 import com.library.auth_service.dtos.responses.AuthResponse;
 import com.library.auth_service.dtos.responses.BooleanResponse;
-import com.library.auth_service.dtos.responses.TokenResponse;
 import com.library.auth_service.exceptions.AppException;
 import com.library.auth_service.services.impl.TokenServiceImpl;
 import com.nimbusds.jose.JOSEException;
@@ -23,7 +22,6 @@ public class AuthController {
 
     @PostMapping("/authenticate")
     public ApiResponse<BooleanResponse> authenticate(@RequestBody AuthRequest authRequest) throws AppException {
-        BooleanResponse r = tokenServiceImpl.authenticate(authRequest);
         return ApiResponse.<BooleanResponse>builder()
                 .data(tokenServiceImpl.authenticate(authRequest))
                 .build();

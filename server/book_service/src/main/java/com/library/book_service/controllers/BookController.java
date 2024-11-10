@@ -33,7 +33,7 @@ public class BookController {
     }
 
     @PutMapping("/return/{userId}")
-    public ApiResponse<Boolean> returnBook(@RequestBody List<Long> bookIds, @PathVariable Long userId){
+    public ApiResponse<Boolean> returnBook(@RequestBody List<Long> bookIds, @PathVariable Long userId) throws AppException {
         bookService.returnBook(bookIds, userId);
         return ApiResponse.<Boolean>builder()
                 .data(true)
@@ -41,14 +41,14 @@ public class BookController {
     }
 
     @PostMapping("/number")
-    public ApiResponse<List<Long>> newBook(@RequestBody List<Long> ids) throws JsonProcessingException {
+    public ApiResponse<List<Long>> newBook(@RequestBody List<Long> ids) throws JsonProcessingException, AppException {
         return ApiResponse.<List<Long>>builder()
                 .data(bookService.getNumbers(ids))
                 .build();
     }
 
     @PostMapping("/borrows/{userId}")
-    public ApiResponse<Boolean> borrow(@RequestBody List<Long> id, @PathVariable Long userId){
+    public ApiResponse<Boolean> borrow(@RequestBody List<Long> id, @PathVariable Long userId) throws AppException {
         bookService.borrow(id, userId);
         return ApiResponse.<Boolean>builder()
                 .data(true)
@@ -56,7 +56,7 @@ public class BookController {
     }
 
     @PostMapping("/borrow/{userId}")
-    public ApiResponse<Boolean> borrow(@RequestBody Long id, @PathVariable Long userId){
+    public ApiResponse<Boolean> borrow(@RequestBody Long id, @PathVariable Long userId) throws AppException {
         bookService.borrow(id, userId);
         return ApiResponse.<Boolean>builder()
                 .data(true)
@@ -64,7 +64,7 @@ public class BookController {
     }
 
     @GetMapping("/number/{id}")
-    public ApiResponse<Long> getNumberById(@PathVariable Long id) throws JsonProcessingException {
+    public ApiResponse<Long> getNumberById(@PathVariable Long id) throws JsonProcessingException, AppException {
         return ApiResponse.<Long>builder()
                 .data(bookService.getNumberById(id))
                 .build();
@@ -94,7 +94,7 @@ public class BookController {
 
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PutMapping("/update")
-    public ApiResponse<BookResponse> updateBook(@RequestParam Long id, @RequestBody NewBookRequest request) {
+    public ApiResponse<BookResponse> updateBook(@RequestParam Long id, @RequestBody NewBookRequest request) throws AppException {
         return ApiResponse.<BookResponse>builder()
                 .data(bookService.updateBook(id, request))
                 .build();
