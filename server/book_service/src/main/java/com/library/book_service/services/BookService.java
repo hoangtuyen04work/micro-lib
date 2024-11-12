@@ -12,9 +12,13 @@ import java.util.List;
 import java.util.Optional;
 
 public interface BookService {
+    PageResponse<BookResponse> getTopBorrow(Integer page, Integer size);
+
+    List<BookResponse> getBooks(List<Long> bookIds);
+
     PageResponse<BookResponseSimple> getTop(Integer size, Integer page, Integer typeId) throws JsonProcessingException;
 
-    List<BookResponse> getAll() throws JsonProcessingException;
+    List<BookResponse> getAll(Integer page, Integer size, String sort) throws JsonProcessingException;
 
     PageResponse<BookResponseSimple> search(String name, Integer size, Integer page) throws JsonProcessingException;
 

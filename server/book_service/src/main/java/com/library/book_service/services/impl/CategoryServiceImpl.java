@@ -23,6 +23,11 @@ public class CategoryServiceImpl implements CategoryService {
     CategoryRepo categoryRepo;
 
     @Override
+    public void delete(Long id){
+        categoryRepo.deleteById(id);
+    }
+
+    @Override
     public Category findById(Long id){
         return categoryRepo.findById(id).get();
     }

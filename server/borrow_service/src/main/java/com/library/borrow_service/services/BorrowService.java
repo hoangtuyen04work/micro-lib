@@ -1,11 +1,16 @@
 package com.library.borrow_service.services;
 
 import com.library.borrow_service.dtos.responses.BorrowResponse;
+import com.library.borrow_service.dtos.responses.PageResponse;
 import com.library.borrow_service.entities.Borrow;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 
 public interface BorrowService {
+
+    PageResponse<Long> topBorrow(Integer page, Integer size);
 
     boolean borrowBook(List<Long> bookIds, Long userId);
 

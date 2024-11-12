@@ -7,9 +7,8 @@ import com.library.book_service.services.CategoryService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.hibernate.annotations.DialectOverride;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
@@ -19,10 +18,20 @@ import java.util.List;
 public class CategoryController {
     CategoryService categoryService;
 
+    @PreAuthorize("hasAuthority('ADMIN')")
     @PostMapping("/new")
     public ApiResponse<CategoryResponse> createCategory(@RequestBody CategoryRequest categoryRequest) {
         return ApiResponse.<CategoryResponse>builder()
                 .data(categoryService.createCategory(categoryRequest))
+                .build();
+    }
+
+    @PreAuthorize("hasAuthority('AMDIN')")
+    @DeleteMapping()
+    public ApiResponse<Boolean> deleteCategory(@RequestParam(required = true) Long id){
+        categoryService.delete(id);
+        return ApiResponse.<Boolean>builder()
+                .data(true)
                 .build();
     }
 

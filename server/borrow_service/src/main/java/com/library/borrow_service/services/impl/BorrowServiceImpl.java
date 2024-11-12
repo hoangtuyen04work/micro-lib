@@ -1,13 +1,19 @@
 package com.library.borrow_service.services.impl;
 
 import com.library.borrow_service.dtos.responses.BorrowResponse;
+import com.library.borrow_service.dtos.responses.PageResponse;
 import com.library.borrow_service.entities.Borrow;
 import com.library.borrow_service.repositories.BorrowRepo;
 import com.library.borrow_service.repositories.httpclients.BookClient;
 import com.library.borrow_service.services.BorrowService;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -19,6 +25,19 @@ import java.util.List;
 public class BorrowServiceImpl implements BorrowService {
     BorrowRepo borrowRepo;
     BookClient bookClient;
+
+    @Override
+    public PageResponse<Long> topBorrow(Integer page, Integer size){
+        Pageable pageable = PageRequest.of(page, size, Sort.by("borrowDate").descending());
+        Page<Long> pages = borrowRepo.getAll(pageable);
+        return PageResponse.<Long>builder()
+                .content(pages.getContent())
+                .pageNumber(pages.getNumber())
+                .pageSize(pages.getSize())
+                .totalElements(pages.getTotalElements())
+                .totalPages(pages.getTotalPages())
+                .build();
+    }
 
     @Override
     public boolean borrowBook(List<Long> bookIds, Long userId) {

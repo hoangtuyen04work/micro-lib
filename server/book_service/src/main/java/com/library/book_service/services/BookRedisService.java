@@ -14,6 +14,10 @@ public interface BookRedisService {
 
     void saveGetTop(Integer typeId, Integer size, Integer page, PageResponse<BookResponseSimple> response) throws JsonProcessingException;
 
+    List<BookResponse> getAll(Integer page, Integer size, String sort) throws JsonProcessingException;
+
+    void saveGetAll(List<BookResponse> response, Integer page, Integer size, String sort) throws JsonProcessingException;
+
     List<BookResponse> getAll() throws JsonProcessingException;
 
     void saveGetAll(List<BookResponse> response) throws JsonProcessingException;

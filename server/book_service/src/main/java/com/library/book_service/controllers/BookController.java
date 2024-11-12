@@ -7,7 +7,7 @@ import com.library.book_service.dtos.responses.BookResponse;
 import com.library.book_service.dtos.responses.BookResponseSimple;
 import com.library.book_service.dtos.responses.PageResponse;
 import com.library.book_service.exceptions.AppException;
-import com.library.book_service.services.impl.BookServiceImpl;
+import com.library.book_service.services.BookService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -21,7 +21,15 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("/book")
 public class BookController {
-    BookServiceImpl bookService;
+    BookService bookService;
+
+    @GetMapping("/getTop")
+    public ApiResponse<PageResponse<BookResponse>> getTop(@RequestParam(defaultValue = "0") Integer page,
+                                                          @RequestParam(defaultValue = "10")Integer size) {
+        return ApiResponse.<PageResponse<BookResponse>>builder()
+                .data(bookService.getTopBorrow(page, size))
+                .build();
+    }
 
     @GetMapping("/search")
     public ApiResponse<PageResponse<BookResponseSimple>> getAllBooks(@RequestParam String name,
@@ -56,7 +64,7 @@ public class BookController {
     }
 
     @PostMapping("/borrow/{userId}")
-    public ApiResponse<Boolean> borrow(@RequestBody Long id, @PathVariable Long userId) throws AppException {
+    public ApiResponse<Boolean> borrow(@RequestBody Long id, @PathVariable Long userId) throws AppException, JsonProcessingException {
         bookService.borrow(id, userId);
         return ApiResponse.<Boolean>builder()
                 .data(true)
@@ -84,11 +92,20 @@ public class BookController {
                 .data(bookService.getById(id))
                 .build();
     }
+    @GetMapping("/gets")
+    public ApiResponse<List<BookResponse>> getBook(@RequestParam List<Long> bookIds) {
+        return ApiResponse.<List<BookResponse>>builder()
+                .data(bookService.getBooks(bookIds))
+                .build();
+    }
 
     @GetMapping("/getAll")
-    public ApiResponse<List<BookResponse>> getALlBook() throws AppException, JsonProcessingException {
+    public ApiResponse<List<BookResponse>> getALlBook(@RequestParam(defaultValue = "0") Integer page,
+                                                      @RequestParam(defaultValue = "10") Integer size,
+                                                      @RequestParam(required = false) String sort
+                                                      ) throws JsonProcessingException {
         return ApiResponse.<List<BookResponse>>builder()
-                .data(bookService.getAll())
+                .data(bookService.getAll(page, size, sort))
                 .build();
     }
 

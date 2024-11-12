@@ -5,7 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 public interface RedisCacheService {
     <T> T get(String key) throws JsonProcessingException;
 
-    void save(String key, Object data) throws JsonProcessingException;
+    <T>void save(String key, T data) throws JsonProcessingException;
 
     void clear();
 }

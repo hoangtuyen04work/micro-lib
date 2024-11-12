@@ -9,6 +9,8 @@ import java.util.List;
 public interface CategoryService {
     Category findByCategory(String name);
 
+    void delete(Long id);
+
     Category findById(Long id);
 
     List<Category> findByIds(List<CategoryRequest> requests);

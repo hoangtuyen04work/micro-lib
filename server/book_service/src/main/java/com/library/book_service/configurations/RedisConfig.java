@@ -39,6 +39,7 @@ public class RedisConfig {
         return template;
     }
 
+
     @Bean
     public ObjectMapper objectMapper() {
         ObjectMapper mapper = new ObjectMapper();
@@ -46,7 +47,7 @@ public class RedisConfig {
         mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false); // Đảm bảo rằng các kiểu thời gian được tuần tự hóa dưới dạng chuỗi ISO-8601 thay vì timestamp
         return mapper;
     }
- }
+}
 
 
 

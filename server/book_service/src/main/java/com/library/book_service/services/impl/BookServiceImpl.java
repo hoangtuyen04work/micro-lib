@@ -1,6 +1,7 @@
 package com.library.book_service.services.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.library.book_service.repositories.httpclient.BorrowClient;
 import com.library.book_service.services.KafkaService;
 import com.library.book_service.dtos.requests.NewBookRequest;
 import com.library.book_service.dtos.responses.BookResponse;
@@ -39,6 +40,30 @@ public class BookServiceImpl implements BookService{
     AmazonS3Client amazonS3Client;
     BookRedisService bookRedisService;
     KafkaService kafkaService;
+    BorrowClient borrowClient;
+
+    @Override
+    public PageResponse<BookResponse> getTopBorrow(Integer page, Integer size){
+        PageResponse<Long> pages = borrowClient.getTopBooks(page, size).getData();
+        return PageResponse.<BookResponse>builder()
+                .content(getBooks(pages.getContent()))
+                .pageSize(size)
+                .totalElements(pages.getTotalElements())
+                .pageNumber(pages.getPageNumber())
+                .totalPages(pages.getTotalPages())
+                .build();
+    }
+
+    @SneakyThrows
+    @Override
+    public List<BookResponse> getBooks(List<Long> bookIds){
+        List<Book> books = new ArrayList<>();
+        for(Long bookId : bookIds){
+            Optional<Book> book = bookRepo.findById(bookId);
+            book.ifPresent(books::add);
+        }
+        return mapping.toBookResponses(books);
+    }
 
     @Override
     public PageResponse<BookResponseSimple> getTop(Integer size, Integer page, Integer typeId) throws JsonProcessingException {
@@ -59,11 +84,12 @@ public class BookServiceImpl implements BookService{
     }
 
     @Override
-    public List<BookResponse> getAll() throws JsonProcessingException {
-        List<BookResponse> responses = bookRedisService.getAll();
+    public List<BookResponse> getAll(Integer page, Integer size, String sort) throws JsonProcessingException {
+        List<BookResponse> responses = bookRedisService.getAll(page, size, sort);
         if(responses != null) return responses;
-        responses = bookRepo.findAll().stream().map(mapping::toBookResponse).toList();
-        bookRedisService.saveGetAll(responses);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sort));
+        responses = bookRepo.findAll(pageable).stream().map(mapping::toBookResponse).toList();
+        bookRedisService.saveGetAll(responses, page, size, sort);
         return responses;
     }
 
@@ -72,7 +98,7 @@ public class BookServiceImpl implements BookService{
         PageResponse<BookResponseSimple> responses;
         responses = bookRedisService.search(name, size, page);
         if(responses != null) return responses;
-        Pageable pageable = PageRequest.of(page - 1, size);
+        Pageable pageable = PageRequest.of(page, size);
         Page<Book> books = bookRepo.findByNameContaining(name, pageable);
         PageResponse<BookResponseSimple> response = mapping.toPageResponseSimple(books);
         bookRedisService.saveSearch(name, size, page, response);

@@ -32,5 +32,9 @@ amazon:
   secretKey: "ZY5fVluOq+mZqOSqRG7yZaHyxe5LlcRZhSdX66rC"
   region: "ap-southeast-1"
   bucket-name: "tuyen-third-bucket"
-
+app:
+  service:
+    borrow:
+      name: "borrow-service"
+      url: "http://localhost:8082/borrow"
 

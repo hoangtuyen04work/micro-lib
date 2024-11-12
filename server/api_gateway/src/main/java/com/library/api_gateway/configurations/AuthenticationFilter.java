@@ -1,10 +1,8 @@
 package com.library.api_gateway.configurations;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.library.api_gateway.dtos.ApiResponse;
-import com.library.api_gateway.dtos.AuthResponse;
 import com.library.api_gateway.services.AuthService;
 import lombok.experimental.NonFinal;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +17,6 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
@@ -45,10 +42,10 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             return chain.filter(exchange);
         }
         List<String> authHeader = exchange.getRequest().getHeaders().get(HttpHeaders.AUTHORIZATION);
-        if (authHeader == null || authHeader.isEmpty() || authHeader.get(0).isBlank()) {
+        if (authHeader == null || authHeader.isEmpty() || authHeader.getFirst().isBlank()) {
             return unAuthenticated(exchange.getResponse());
         }
-        String token = authHeader.get(0).replace("Bearer ", "");
+        String token = authHeader.getFirst().replace("Bearer ", "");
         return authService.authenticate(token)
                 .flatMap(authResponse -> {
                     return chain.filter(exchange);
