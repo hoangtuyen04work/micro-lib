@@ -10,7 +10,14 @@ import java.util.List;
 
 public interface BorrowService {
 
+    PageResponse<BorrowResponse> getRecentlyAction(Integer page, Integer size);
+
+    PageResponse<Long> getRecently(Integer userId, Integer page, Integer size);
+
     PageResponse<Long> topBorrow(Integer page, Integer size);
+
+    //return a book of a user
+    boolean returnBook(Long bookId, Long userId);
 
     boolean borrowBook(List<Long> bookIds, Long userId);
 
@@ -25,8 +32,4 @@ public interface BorrowService {
     List<BorrowResponse> findByUserId(Long userId, String status);
 
     List<BorrowResponse> findByBookId(Long bookId);
-
-    BorrowResponse toBorrowResponse(Borrow borrow);
-
-    Borrow toBorrow(Borrow borrow);
 }

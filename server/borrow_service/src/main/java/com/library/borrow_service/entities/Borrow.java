@@ -8,6 +8,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 
 @Entity
@@ -23,7 +24,7 @@ public class Borrow {
     Long id;
     Long bookId;
     Long userId;
-    LocalDate borrowDate;
-    LocalDate returnDate;
+    LocalDateTime borrowDate;
+    LocalDateTime returnDate;
     String status;
 }

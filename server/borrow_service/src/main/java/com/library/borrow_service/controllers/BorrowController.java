@@ -17,11 +17,29 @@ import java.util.List;
 public class BorrowController {
     BorrowService borrowService;
 
+    @GetMapping("/recently/{userId}")
+    public ApiResponse<PageResponse<Long>> getRecently(@PathVariable Integer userId,
+                                                       @RequestParam(defaultValue = "0") Integer page,
+                                                       @RequestParam(defaultValue = "10") Integer size){
+        return ApiResponse.<PageResponse<Long>>builder()
+                .data(borrowService.getRecently(userId, page, size))
+                .build();
+    }
+
     @GetMapping("/top")
     public ApiResponse<PageResponse<Long>> getTop(@RequestParam(defaultValue = "0") Integer page,
                                                   @RequestParam(defaultValue = "10") Integer size){
         return ApiResponse.<PageResponse<Long>>builder()
                 .data(borrowService.topBorrow(page, size))
+                .build();
+    }
+
+    //recently action of lib
+    @GetMapping("/action/recently")
+    public ApiResponse<PageResponse<BorrowResponse>> getRecentlyAction(@RequestParam(defaultValue = "0") Integer page,
+                                                                 @RequestParam(defaultValue = "10") Integer size){
+        return ApiResponse.<PageResponse<BorrowResponse>>builder()
+                .data(borrowService.getRecentlyAction(page, size))
                 .build();
     }
 
@@ -33,12 +51,21 @@ public class BorrowController {
     }
 
     @PutMapping("/borrow/{userId}/{bookId}")
-    public ApiResponse<Boolean> borrowBook(@PathVariable Long bookId, @PathVariable Long userId) {
+    public ApiResponse<Boolean> borrowBook(@PathVariable Long userId, @PathVariable Long bookId) {
         return ApiResponse.<Boolean>builder()
                 .data(borrowService.borrowBook(bookId, userId))
                 .build();
     }
 
+    //return a book borrowed by userId
+    @PutMapping("/return/{userId}/{bookId}")
+    public ApiResponse<Boolean> returnBook(@PathVariable Long userId, @PathVariable Long bookId) {
+        return ApiResponse.<Boolean>builder()
+                .data(borrowService.returnBook(bookId, userId))
+                .build();
+    }
+
+    //return list book
     @PutMapping("/return/{userId}")
     public ApiResponse<Boolean> returnBook(@RequestBody List<Long> ids,@PathVariable Long userId) {
         return ApiResponse.<Boolean>builder()

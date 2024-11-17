@@ -2,6 +2,7 @@ package com.library.auth_service.services.impl;
 
 import com.library.auth_service.dtos.requests.AuthRequest;
 import com.library.auth_service.dtos.requests.TokenRequest;
+import com.library.auth_service.dtos.requests.UserCreationRequest;
 import com.library.auth_service.dtos.requests.UserRequest;
 import com.library.auth_service.dtos.responses.AuthResponse;
 import com.library.auth_service.dtos.responses.BooleanResponse;
@@ -66,7 +67,7 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public AuthResponse signup(UserRequest request) throws AppException, JOSEException {
+    public AuthResponse signup(UserCreationRequest request) throws AppException, JOSEException {
         User user = userServiceImpl.createUser(request);
         Token token = createToken(user);
         tokenRepo.save(token);

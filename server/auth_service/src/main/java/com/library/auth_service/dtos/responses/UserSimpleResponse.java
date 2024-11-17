@@ -1,8 +1,11 @@
-package com.library.comment_service.dtos;
+package com.library.auth_service.dtos.responses;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.util.Date;
+import java.util.List;
 
 @Data
 @Builder
@@ -10,11 +13,10 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ApiResponse<T>{
-    @Builder.Default
-    int code = 200;
-    T data;
-    @Builder.Default
-    String message = "Successful";
+public class UserSimpleResponse {
+    Long id;
+    String name;
+    String email;
+    String phone;
+    Date createdAt;
 }
-

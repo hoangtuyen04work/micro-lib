@@ -17,6 +17,9 @@ public interface BookClient {
     @PostMapping("/book/borrow/{userId}")
     ApiResponse<Boolean> borrow(@RequestBody Long id, @PathVariable Long userId);
 
-    @PutMapping("/book/return/{userId}")
+    @PutMapping("/book/returns/{userId}")
     ApiResponse<Boolean> returnBook(@RequestBody List<Long> bookIds, @PathVariable Long userId);
+
+    @PutMapping("/book/return/{userId}")
+    ApiResponse<Boolean> returnBook(@RequestBody Long id, @PathVariable Long userId);
 }

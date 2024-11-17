@@ -2,6 +2,7 @@ package com.library.auth_service.services;
 
 import com.library.auth_service.dtos.requests.AuthRequest;
 import com.library.auth_service.dtos.requests.TokenRequest;
+import com.library.auth_service.dtos.requests.UserCreationRequest;
 import com.library.auth_service.dtos.requests.UserRequest;
 import com.library.auth_service.dtos.responses.AuthResponse;
 import com.library.auth_service.dtos.responses.BooleanResponse;
@@ -21,7 +22,7 @@ public interface TokenService {
 
     AuthResponse login(UserRequest request) throws AppException, JOSEException;
 
-    AuthResponse signup(UserRequest request) throws AppException, JOSEException;
+    AuthResponse signup(UserCreationRequest request) throws AppException, JOSEException;
 
     BooleanResponse authenticate(AuthRequest authRequest) throws AppException;
 

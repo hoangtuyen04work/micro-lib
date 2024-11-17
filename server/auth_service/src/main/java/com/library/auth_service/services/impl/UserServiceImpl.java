@@ -1,7 +1,8 @@
 package com.library.auth_service.services.impl;
 
-import com.library.auth_service.dtos.requests.RoleRequest;
-import com.library.auth_service.dtos.requests.UserRequest;
+import com.library.auth_service.dtos.requests.UserCreationRequest;
+import com.library.auth_service.dtos.responses.PageResponse;
+import com.library.auth_service.dtos.responses.UserSimpleResponse;
 import com.library.auth_service.entities.User;
 import com.library.auth_service.exceptions.AppException;
 import com.library.auth_service.exceptions.ErrorCode;
@@ -12,10 +13,12 @@ import com.library.auth_service.utils.Mapping;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -25,6 +28,13 @@ public class UserServiceImpl implements UserService {
     PasswordEncoder passwordEncoder;
     Mapping mapping;
     AmazonS3Client amazonS3Client;
+
+    @Override
+    public PageResponse<UserSimpleResponse> getBasicInfo(Integer page, Integer size){
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<User> pages = userRepo.findAll(pageable);
+        return mapping.toPageUserSimpleResponse(pages);
+    }
 
     @Override
     public User emailVerify(String email, String password) throws AppException {
@@ -76,7 +86,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User createUser(UserRequest request) throws AppException {
+    public User createUser(UserCreationRequest request) throws AppException {
         if(request.getName() == null || userRepo.existsByName(request.getName())) throw new AppException(ErrorCode.USERNAME_EXISTED);
         if(request.getEmail() == null && request.getPhone() == null){
             throw new AppException(ErrorCode.INVALID_INPUT);
@@ -87,7 +97,6 @@ public class UserServiceImpl implements UserService {
         else if(request.getPhone() != null && userRepo.existsByPhone(request.getPhone())){
             throw new AppException(ErrorCode.USER_EXISTED);
         }
-        request.setRoles(List.of(new RoleRequest(1L, "USER")));
         User user = mapping.toUser(request);
         if(request.getMultipartFile() != null) user.setImageUrl(amazonS3Client.uploadImage(request.getMultipartFile()));
         user.setPassword(passwordEncoder.encode(user.getPassword()));
