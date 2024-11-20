@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.library.book_service.dtos.requests.NewBookRequest;
 import com.library.book_service.dtos.responses.BookResponse;
 import com.library.book_service.dtos.responses.BookResponseSimple;
+import com.library.book_service.dtos.responses.BookSimpleResponse;
 import com.library.book_service.dtos.responses.PageResponse;
 import com.library.book_service.entities.Book;
 import com.library.book_service.exceptions.AppException;
@@ -12,6 +13,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface BookService {
+    PageResponse<BookSimpleResponse> getBookSimpleResponse(Integer page, Integer size);
+
     PageResponse<BookResponse> getTopBorrow(Integer page, Integer size);
 
     List<BookResponse> getBooks(List<Long> bookIds);

@@ -1,9 +1,6 @@
 package com.library.auth_service.services;
 
-import com.library.auth_service.dtos.requests.AuthRequest;
-import com.library.auth_service.dtos.requests.TokenRequest;
-import com.library.auth_service.dtos.requests.UserCreationRequest;
-import com.library.auth_service.dtos.requests.UserRequest;
+import com.library.auth_service.dtos.requests.*;
 import com.library.auth_service.dtos.responses.AuthResponse;
 import com.library.auth_service.dtos.responses.BooleanResponse;
 import com.library.auth_service.dtos.responses.TokenResponse;
@@ -18,13 +15,15 @@ import java.util.Set;
 
 public interface TokenService {
 
-    void logout(TokenRequest request);
+    void logout(AuthRequest request);
 
     AuthResponse login(UserRequest request) throws AppException, JOSEException;
 
     AuthResponse signup(UserCreationRequest request) throws AppException, JOSEException;
 
     BooleanResponse authenticate(AuthRequest authRequest) throws AppException;
+
+    AuthResponse refreshTokenOk(RefreshTokenRequest request) throws AppException;
 
     Token refreshToken(String refreshToken) throws AppException, JOSEException;
 

@@ -1,9 +1,10 @@
 package com.library.auth_service.services.impl;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 
-import com.library.auth_service.dtos.requests.AuthRequest;
-import com.library.auth_service.dtos.requests.TokenRequest;
-import com.library.auth_service.dtos.requests.UserCreationRequest;
-import com.library.auth_service.dtos.requests.UserRequest;
+import com.library.auth_service.dtos.requests.*;
 import com.library.auth_service.dtos.responses.AuthResponse;
 import com.library.auth_service.dtos.responses.BooleanResponse;
 import com.library.auth_service.dtos.responses.TokenResponse;
@@ -28,8 +29,6 @@ import lombok.experimental.NonFinal;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 import java.util.StringJoiner;
@@ -48,7 +47,7 @@ public class TokenServiceImpl implements TokenService {
 
     @Override
     @Transactional
-    public void logout(TokenRequest request){
+    public void logout(AuthRequest request){
         tokenRepo.deleteByToken(request.getToken());
     }
 
@@ -85,10 +84,21 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
+    public AuthResponse refreshTokenOk(RefreshTokenRequest request) throws AppException {
+        if(!tokenRepo.existsByRefreshToken(request.getRefreshToken())) throw  new AppException(ErrorCode.REFRESH_TOKEN_INVALID);
+        Token token = tokenRepo.findTokenByRefreshToken(request.getRefreshToken());
+        if(token.getExpiry_refreshToken().isBefore(LocalDateTime.now())) throw  new AppException(ErrorCode.REFRESH_TOKEN_INVALID);
+        tokenRepo.delete(token);
+        User user = userServiceImpl.findUserById(token.getUserid());
+        tokenRepo.save(token);
+        return mapping.toAuthResponse(user, token);
+    }
+
+    @Override
     public Token refreshToken(String refreshToken) throws AppException, JOSEException {
         if(tokenRepo.existsByRefreshToken(refreshToken)) throw  new AppException(ErrorCode.REFRESH_TOKEN_INVALID);
         Token token = tokenRepo.findTokenByRefreshToken(refreshToken);
-        if(token.getExpiry_refreshToken().before(new Date())) throw  new AppException(ErrorCode.REFRESH_TOKEN_INVALID);
+        if(token.getExpiry_refreshToken().isBefore(LocalDateTime.now())) throw  new AppException(ErrorCode.REFRESH_TOKEN_INVALID);
         tokenRepo.delete(token);
         return createToken(userServiceImpl.findUserById(token.getUserid()));
     }
@@ -111,12 +121,21 @@ public class TokenServiceImpl implements TokenService {
 
     @Override
     public Token createToken(User user) throws JOSEException {
+        LocalDateTime expiryToken = LocalDateTime.ofInstant(
+                Instant.now().plus(15 * 24 * 60 * 60, ChronoUnit.SECONDS),
+                ZoneId.systemDefault() // Sử dụng múi giờ hệ thống
+        );
+
+        LocalDateTime expiryRefreshToken = LocalDateTime.ofInstant(
+                Instant.now().plus(30 * 24 * 60 * 60, ChronoUnit.SECONDS),
+                ZoneId.systemDefault() // Sử dụng múi giờ hệ thống
+        );
         return Token.builder()
                 .userid(user.getId())
                 .token(generateToken(user))
                 .refreshToken(generateRefreshToken())
-                .expiry_Token(Date.from(Instant.now().plus(15*24*60*60, ChronoUnit.SECONDS)))
-                .expiry_refreshToken(Date.from(Instant.now().plus(30*24*60*60, ChronoUnit.SECONDS)))
+                .expiry_Token(expiryToken)
+                .expiry_refreshToken(expiryRefreshToken)
                 .build();
     }
 

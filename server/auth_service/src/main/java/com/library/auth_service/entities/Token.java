@@ -6,6 +6,7 @@ import jakarta.persistence.Id;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -19,8 +20,8 @@ public class Token {
     @Id
     @Column(length = 512)
     String token;
-    Date expiry_Token;
+    LocalDateTime expiry_Token;
     String refreshToken;
-    Date expiry_refreshToken;
+    LocalDateTime expiry_refreshToken;
     Long userid;
 }

@@ -1,6 +1,7 @@
 package com.library.book_service.services.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.library.book_service.dtos.responses.BookSimpleResponse;
 import com.library.book_service.repositories.httpclient.BorrowClient;
 import com.library.book_service.services.KafkaService;
 import com.library.book_service.dtos.requests.NewBookRequest;
@@ -41,6 +42,13 @@ public class BookServiceImpl implements BookService{
     BookRedisService bookRedisService;
     KafkaService kafkaService;
     BorrowClient borrowClient;
+
+    @Override
+    public PageResponse<BookSimpleResponse> getBookSimpleResponse(Integer page, Integer size){
+        Pageable pageable = PageRequest.of(page, size, Sort.by("numberBorrowed").descending());
+        Page<Book> books = bookRepo.findAll(pageable);
+        return mapping.toPagePageBookSimpleResponse(books);
+    }
 
     @Override
     public PageResponse<BookResponse> getTopBorrow(Integer page, Integer size){
@@ -200,7 +208,9 @@ public class BookServiceImpl implements BookService{
         if(updated.getImage() != null){
             imageUrl = amazonS3Client.uploadImage(updated.getImage());
         }
-        return mapping.toBookResponse(bookRepo.save(checkOptional(optionalBook)), updated, imageUrl);
+        Book book = checkOptional(optionalBook);
+        mapping.toBook(book, updated, imageUrl);
+        return mapping.toBookResponse(bookRepo.save(book), updated, imageUrl);
     }
 
     @Override

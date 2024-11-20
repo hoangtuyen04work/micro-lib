@@ -5,6 +5,7 @@ import com.library.book_service.dtos.ApiResponse;
 import com.library.book_service.dtos.requests.NewBookRequest;
 import com.library.book_service.dtos.responses.BookResponse;
 import com.library.book_service.dtos.responses.BookResponseSimple;
+import com.library.book_service.dtos.responses.BookSimpleResponse;
 import com.library.book_service.dtos.responses.PageResponse;
 import com.library.book_service.exceptions.AppException;
 import com.library.book_service.services.BookService;
@@ -22,6 +23,16 @@ import java.util.List;
 @RequestMapping("/book")
 public class BookController {
     BookService bookService;
+
+    //get basic information of a book
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @GetMapping("/basic")
+    public ApiResponse<PageResponse<BookSimpleResponse>> getTopBasic(@RequestParam(defaultValue = "0") Integer page,
+                                                                              @RequestParam(defaultValue = "10")Integer size) {
+        return ApiResponse.<PageResponse<BookSimpleResponse>>builder()
+                .data(bookService.getBookSimpleResponse(page, size))
+                .build();
+    }
 
     // get list book recently borrowed
     @GetMapping("/getTop")
@@ -88,13 +99,7 @@ public class BookController {
                 .build();
     }
 
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    @PostMapping("/create")
-    public ApiResponse<BookResponse> createBook(@ModelAttribute NewBookRequest request) {
-        return ApiResponse.<BookResponse>builder()
-                .data(bookService.createBook(request))
-                .build();
-    }
+
 
     @GetMapping("/{id}")
     public ApiResponse<BookResponse> getBook(@PathVariable Long id) throws AppException, JsonProcessingException {
@@ -102,6 +107,7 @@ public class BookController {
                 .data(bookService.getById(id))
                 .build();
     }
+
     @GetMapping("/gets")
     public ApiResponse<List<BookResponse>> getBook(@RequestParam List<Long> bookIds) {
         return ApiResponse.<List<BookResponse>>builder()
@@ -112,10 +118,18 @@ public class BookController {
     @GetMapping("/getAll")
     public ApiResponse<List<BookResponse>> getALlBook(@RequestParam(defaultValue = "0") Integer page,
                                                       @RequestParam(defaultValue = "10") Integer size,
-                                                      @RequestParam(required = false) String sort
+                                                      @RequestParam(required = false, defaultValue = "id") String sort
                                                       ) throws JsonProcessingException {
         return ApiResponse.<List<BookResponse>>builder()
                 .data(bookService.getAll(page, size, sort))
+                .build();
+    }
+
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PostMapping("/create")
+    public ApiResponse<BookResponse> createBook(@ModelAttribute NewBookRequest request) {
+        return ApiResponse.<BookResponse>builder()
+                .data(bookService.createBook(request))
                 .build();
     }
 
