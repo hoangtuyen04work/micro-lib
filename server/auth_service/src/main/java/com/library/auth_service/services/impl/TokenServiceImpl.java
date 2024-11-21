@@ -84,15 +84,34 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public AuthResponse refreshTokenOk(RefreshTokenRequest request) throws AppException {
-        if(!tokenRepo.existsByRefreshToken(request.getRefreshToken())) throw  new AppException(ErrorCode.REFRESH_TOKEN_INVALID);
+    @Transactional
+    public AuthResponse refreshTokenOk(RefreshTokenRequest request) throws AppException, JOSEException {
+        if (!tokenRepo.existsByRefreshToken(request.getRefreshToken())) {
+            throw new AppException(ErrorCode.REFRESH_TOKEN_INVALID);
+        }
+
         Token token = tokenRepo.findTokenByRefreshToken(request.getRefreshToken());
-        if(token.getExpiry_refreshToken().isBefore(LocalDateTime.now())) throw  new AppException(ErrorCode.REFRESH_TOKEN_INVALID);
-        tokenRepo.delete(token);
+        if (token.getExpiry_refreshToken().isBefore(LocalDateTime.now())) {
+            throw new AppException(ErrorCode.REFRESH_TOKEN_INVALID);
+        }
+        LocalDateTime expiryToken = LocalDateTime.ofInstant(
+                Instant.now().plus(15 * 24 * 60 * 60, ChronoUnit.SECONDS),
+                ZoneId.systemDefault() // Sử dụng múi giờ hệ thống
+        );
+
+        LocalDateTime expiryRefreshToken = LocalDateTime.ofInstant(
+                Instant.now().plus(30 * 24 * 60 * 60, ChronoUnit.SECONDS),
+                ZoneId.systemDefault() // Sử dụng múi giờ hệ thống
+        );
+        token.setExpiry_refreshToken(expiryRefreshToken);
         User user = userServiceImpl.findUserById(token.getUserid());
+        token.setExpiry_Token(expiryToken);
+        token.setToken(generateToken(user));
+        token.setRefreshToken(generateRefreshToken());
         tokenRepo.save(token);
         return mapping.toAuthResponse(user, token);
     }
+
 
     @Override
     public Token refreshToken(String refreshToken) throws AppException, JOSEException {

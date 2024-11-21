@@ -23,7 +23,7 @@ public interface TokenService {
 
     BooleanResponse authenticate(AuthRequest authRequest) throws AppException;
 
-    AuthResponse refreshTokenOk(RefreshTokenRequest request) throws AppException;
+    AuthResponse refreshTokenOk(RefreshTokenRequest request) throws AppException, JOSEException;
 
     Token refreshToken(String refreshToken) throws AppException, JOSEException;
 

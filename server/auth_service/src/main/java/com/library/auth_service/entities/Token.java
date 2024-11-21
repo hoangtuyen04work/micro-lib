@@ -1,8 +1,6 @@
 package com.library.auth_service.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -18,6 +16,10 @@ import java.util.Date;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Token {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    Long id;
+
+
     @Column(length = 512)
     String token;
     LocalDateTime expiry_Token;
