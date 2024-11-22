@@ -24,7 +24,7 @@ public class NewBookRequest {
     String shortDescription;
     Long price;
     String author;
-    MultipartFile image;
+    Object image;
     String language;
     List<CategoryRequest> categories;
 }

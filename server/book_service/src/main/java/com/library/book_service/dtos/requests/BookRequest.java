@@ -23,7 +23,7 @@ public class BookRequest {
     String shortDescription;
     Long price;
     String author;
-    String imageUrl;
+    String image;
     String language;
     Long number;
     List<CategoryRequest> categories;

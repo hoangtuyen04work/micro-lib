@@ -10,14 +10,14 @@ import com.library.book_service.util.Mapping;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class MappingImpl implements Mapping {
 
     @Override
-    public void toBook(Book book, NewBookRequest updated, String imageUrl){
+    public void toBook(Book book, NewBookRequest updated, String image){
         book.setBookCode(updated.getBookCode());
         book.setCategories(toCategories(updated.getCategories()));
         book.setAuthor(updated.getAuthor());
@@ -28,8 +28,8 @@ public class MappingImpl implements Mapping {
         book.setPrice(updated.getPrice());
         book.setPublicationDate(updated.getPublicationDate());
         book.setShortDescription(updated.getShortDescription());
-        if(imageUrl != null){
-            book.setImageUrl(imageUrl);
+        if(image != null){
+            book.setImage(image);
         }
     }
 
@@ -58,7 +58,7 @@ public class MappingImpl implements Mapping {
 
     @Override
     public List<BookResponse> toBookResponses(List<Book> books){
-        return books.stream().map(this::toBookResponse).collect(Collectors.toList());
+        return books.stream().map(this::toBookResponse).toList();
     }
 
     @Override
@@ -102,7 +102,7 @@ public class MappingImpl implements Mapping {
     public BookResponseSimple toBookResponseSimple(Book request){
         return BookResponseSimple.builder()
                 .id(request.getId())
-                .imageUrl(request.getImageUrl())
+                .image(request.getImage())
                 .name(request.getName())
                 .numberBorrowed(request.getNumberBorrowed())
                 .build();
@@ -145,7 +145,7 @@ public class MappingImpl implements Mapping {
                 .author(request.getAuthor())
                 .categories(toCategoryResponses(request.getCategories()))
                 .price(request.getPrice())
-                .imageUrl(request.getImageUrl())
+                .image(request.getImage() == null ? null : request.getImage())
                 .language(request.getLanguage())
                 .shortDescription(request.getShortDescription())
                 .numberPage(request.getNumberPage())
@@ -163,7 +163,7 @@ public class MappingImpl implements Mapping {
                 .author(request.getAuthor())
                 .number(request.getNumber())
                 .categories(toCategories(request.getCategories()))
-                .imageUrl(request.getImageUrl())
+                .image(request.getImage())
                 .price(request.getPrice())
                 .language(request.getLanguage())
                 .shortDescription(request.getShortDescription())
@@ -178,7 +178,7 @@ public class MappingImpl implements Mapping {
     public List<CategoryResponse> toCategoryResponses(List<Category> categories) {
         return categories.stream()
                 .map(this::toCategoryResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -190,11 +190,14 @@ public class MappingImpl implements Mapping {
     }
 
     @Override
-    public List<Category> toCategories(List<CategoryRequest> request){
-        return request.stream()
-                .map(this::toCategory)
-                .toList();
+    public List<Category> toCategories(List<CategoryRequest> request) {
+        return new ArrayList<>(
+                request.stream()
+                        .map(this::toCategory)
+                        .toList() // This returns an immutable list.
+        );
     }
+
 
     @Override
     public Category toCategory(CategoryRequest request){

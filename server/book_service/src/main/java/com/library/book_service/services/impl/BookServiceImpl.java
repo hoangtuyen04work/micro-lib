@@ -26,6 +26,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -204,13 +205,16 @@ public class BookServiceImpl implements BookService{
     @Override
     public BookResponse updateBook(Long id, NewBookRequest updated) throws AppException {
         Optional<Book> optionalBook = bookRepo.findById(id);
-        String imageUrl = null;
-        if(updated.getImage() != null){
-            imageUrl = amazonS3Client.uploadImage(updated.getImage());
+        String image = null;
+        if (updated.getImage() instanceof MultipartFile) {
+            MultipartFile file = (MultipartFile) updated.getImage();
+            image = amazonS3Client.uploadImage(file); // Hàm upload ảnh trả về URL
+        } else if (updated.getImage() instanceof String) {
+            image = (String) updated.getImage();
         }
         Book book = checkOptional(optionalBook);
-        mapping.toBook(book, updated, imageUrl);
-        return mapping.toBookResponse(bookRepo.save(book), updated, imageUrl);
+        mapping.toBook(book, updated, image);
+        return mapping.toBookResponse(bookRepo.save(book), updated, image);
     }
 
     @Override
@@ -221,9 +225,16 @@ public class BookServiceImpl implements BookService{
     //CreateBook
     @Override
     public BookResponse createBook(NewBookRequest request){
+        String image = null;
+        if (request.getImage() instanceof MultipartFile) {
+            MultipartFile file = (MultipartFile) request.getImage();
+            image = amazonS3Client.uploadImage(file); // Hàm upload ảnh trả về URL
+        } else if (request.getImage() instanceof String) {
+            image = (String) request.getImage();
+        }
         Book book = mapping.toBook(request);
         book.setCategories(categoryService.findByIds(request.getCategories()));
-        book.setImageUrl(amazonS3Client.uploadImage(request.getImage()));
+        book.setImage(image);
         book.setNumberBorrowed(0L);
         return mapping.toBookResponse(bookRepo.save(book));
     }

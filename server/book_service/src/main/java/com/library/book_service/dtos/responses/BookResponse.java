@@ -25,7 +25,7 @@ public class BookResponse {
     String shortDescription;
     Long price;
     String author;
-    String imageUrl;
+    String image;
     String language;
     List<CategoryResponse> categories;
 }
