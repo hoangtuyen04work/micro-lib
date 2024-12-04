@@ -1,4 +1,4 @@
-package com.library.auth_service.configurations;
+package com.library.message_service.configurations;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,8 +24,9 @@ import javax.crypto.spec.SecretKeySpec;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@EnableJpaAuditing
 public class SecurityConfig {
-    private final static String[] publicUrl = {"/signup/**", "/login/**", "/logoutt", "/authenticate", "/login/google", "/refreshToken"} ;
+    private final static String[] publicUrl = {"/signup/**", "/login/**", "/logout", "/authenticate", "/login/google"} ;
     @Value("${jwt.signerKey}")
     private String signerKey;
     @Autowired
@@ -34,21 +35,17 @@ public class SecurityConfig {
     private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(publicUrl).permitAll()  // Allow public URLs
-                        .anyRequest().authenticated()           // Require authentication for other requests
-                )
-                .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwtConfigurer -> jwtConfigurer
-                                .decoder(customJwtDecoder)                 // Custom JWT decoder
-                                .jwtAuthenticationConverter(jwtAuthenticationConverter()) // Custom converter
-                        )
-                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)  // Custom entry point
-                )
-                .csrf(AbstractHttpConfigurer::disable); // Disable CSRF protection for stateless APIs
-        return http.build();
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, HttpSecurity httpSecurity) throws Exception {
+        http.authorizeHttpRequests(request ->
+                request.requestMatchers(publicUrl).permitAll()
+                        .anyRequest().authenticated());
+        httpSecurity.oauth2ResourceServer(oauth2->
+                oauth2.jwt(jwtConfigurer ->
+                                jwtConfigurer.decoder(customJwtDecoder)
+                                        .jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                        .authenticationEntryPoint((jwtAuthenticationEntryPoint))
+        ).csrf(AbstractHttpConfigurer::disable);
+        return httpSecurity.build();
     }
 
     @Bean
@@ -58,6 +55,7 @@ public class SecurityConfig {
         JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
         return jwtAuthenticationConverter;
+
     }
 
     @Bean

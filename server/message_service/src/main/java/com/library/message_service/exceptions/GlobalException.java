@@ -1,8 +1,6 @@
-package com.library.auth_service.exceptions;
+package com.library.message_service.exceptions;
 
-import com.library.auth_service.dtos.ApiResponse;
-import lombok.Getter;
-import org.springframework.http.HttpStatus;
+import com.library.borrow_service.dtos.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -12,7 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class GlobalException {
     @ExceptionHandler(value = AccessDeniedException.class)
     ResponseEntity<ApiResponse> handleAccessDeniedException(final AccessDeniedException e){
-        ErrorCode errorCode = ErrorCode.ACCESS_DENIED;
+        ErrorCode errorCode = ErrorCode.ACCESSDENIED;
         return ResponseEntity.status(errorCode.getHttpStatus())
                 .body(ApiResponse.builder()
                         .code(errorCode.getCode())

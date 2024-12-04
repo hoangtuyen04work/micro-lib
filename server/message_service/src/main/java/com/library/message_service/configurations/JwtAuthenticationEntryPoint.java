@@ -1,8 +1,8 @@
-package com.library.auth_service.configurations;
+package com.library.message_service.configurations;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.library.auth_service.dtos.ApiResponse;
-import com.library.auth_service.exceptions.ErrorCode;
+import com.library.borrow_service.dtos.ApiResponse;
+import com.library.borrow_service.exceptions.ErrorCode;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -17,7 +17,7 @@ import java.io.IOException;
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
-        ErrorCode errorCode = ErrorCode.ACCESS_DENIED;
+        ErrorCode errorCode = ErrorCode.ACCESSDENIED;
         response.setStatus(errorCode.getHttpStatus().value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         ApiResponse<?> apiResponse = ApiResponse.builder()

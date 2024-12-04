@@ -6,7 +6,6 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="message_service" />
         <module name="notification" />
         <module name="auth_service" />
         <module name="api_gateway" />
@@ -18,6 +17,7 @@
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="comment_service" target="21" />
+      <module name="message_service" target="21" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">

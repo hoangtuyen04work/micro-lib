@@ -76,7 +76,7 @@ public class TokenServiceImpl implements TokenService {
     @Override
     public BooleanResponse authenticate(AuthRequest authRequest) throws AppException {
         if(!tokenRepo.existsByRefreshToken(authRequest.getRefreshToken()) && !tokenRepo.existsByToken(authRequest.getToken())){
-            throw  new AppException(ErrorCode.TOKEN_INVALID);
+            throw  new AppException(ErrorCode.UNAUTHENTICATED);
         }
         return BooleanResponse.builder()
                 .isValid(verifyToken(authRequest.getToken()))
@@ -130,11 +130,11 @@ public class TokenServiceImpl implements TokenService {
             Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
             boolean verified = signedJWT.verify(verifier);
             if(!verified || expiryTime.before(new Date())){
-                throw  new AppException(ErrorCode.INVALID_INPUT);
+                throw  new AppException(ErrorCode.UNAUTHENTICATED);
             }
             return true;
         } catch (Exception e) {
-            throw new AppException(ErrorCode.INVALID_INPUT);
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
     }
 
@@ -171,9 +171,10 @@ public class TokenServiceImpl implements TokenService {
                 .subject(String.valueOf(user.getId()))
                 .issuer("LIBRARY")
                 .issueTime(new Date())
-                .expirationTime(Date.from(Instant.now().plus(15*24*60*60, ChronoUnit.SECONDS)))
+                .expirationTime(Date.from(Instant.now().plus(40, ChronoUnit.SECONDS)))
                 .jwtID(UUID.randomUUID().toString())
                 .claim("scope", roleScope)
+                .claim("roles", roleScope)
                 .build();
         JWSObject jwsObject = new JWSObject(jwsHeader, new Payload(jwtClaimsSet.toJSONObject()));
         jwsObject.sign(new MACSigner(signerKey.getBytes()));

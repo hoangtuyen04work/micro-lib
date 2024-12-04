@@ -38,26 +38,22 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User emailVerify(String email, String password) throws AppException {
-        if(!isExistByEmail(email)) throw new AppException(ErrorCode.USER_NOT_EXISTED);
+        if(!isExistByEmail(email)) throw new AppException(ErrorCode.INVALID_INPUT);
         User user = findByEmail(email);
-        if(passwordEncoder.matches(password, user.getPassword())){
+        if(passwordEncoder.matches(password, user.getPassword()))
             return user;
-        }
-        else{
-            throw  new AppException(ErrorCode.WRONG_PASSWORD_OR_USERNAME);
-        }
+        else
+            throw  new AppException(ErrorCode.INVALID_INPUT);
     }
 
     @Override
     public User phoneVerify(String phone, String password) throws AppException {
-        if(!isExistByPhone(phone)) throw new AppException(ErrorCode.USER_NOT_EXISTED);
+        if(!isExistByPhone(phone)) throw new AppException(ErrorCode.INVALID_INPUT);
         User user = findByPhone(phone);
-        if(passwordEncoder.matches(password, user.getPassword())){
+        if(passwordEncoder.matches(password, user.getPassword()))
             return user;
-        }
-        else{
-            throw  new AppException(ErrorCode.WRONG_PASSWORD_OR_USERNAME);
-        }
+        else
+            throw  new AppException(ErrorCode.INVALID_INPUT);
     }
 
     @Override
@@ -87,16 +83,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User createUser(UserCreationRequest request) throws AppException {
-        if(request.getName() == null || userRepo.existsByName(request.getName())) throw new AppException(ErrorCode.USERNAME_EXISTED);
-        if(request.getEmail() == null && request.getPhone() == null){
+
+        if(request.getName() == null || userRepo.existsByName(request.getName()))
+            throw new AppException(ErrorCode.USER_ALREADY_EXISTS);
+        if(request.getEmail() == null && request.getPhone() == null)
             throw new AppException(ErrorCode.INVALID_INPUT);
-        }
-        else if(request.getEmail() != null && userRepo.existsByEmail(request.getEmail())){
-            throw new AppException(ErrorCode.USER_EXISTED);
-        }
-        else if(request.getPhone() != null && userRepo.existsByPhone(request.getPhone())){
-            throw new AppException(ErrorCode.USER_EXISTED);
-        }
+        else if(request.getEmail() != null && userRepo.existsByEmail(request.getEmail()))
+            throw new AppException(ErrorCode.EMAIL_ALREADY_EXISTS);
+        else if(request.getPhone() != null && userRepo.existsByPhone(request.getPhone()))
+            throw new AppException(ErrorCode.PHONE_NUMBER_ALREADY_EXISTS);
+
         User user = mapping.toUser(request);
         if(request.getMultipartFile() != null) user.setImageUrl(amazonS3Client.uploadImage(request.getMultipartFile()));
         user.setPassword(passwordEncoder.encode(user.getPassword()));
