@@ -129,8 +129,11 @@ public class TokenServiceImpl implements TokenService {
             SignedJWT signedJWT = SignedJWT.parse(token);
             Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
             boolean verified = signedJWT.verify(verifier);
-            if(!verified || expiryTime.before(new Date())){
+            if(!verified){
                 throw  new AppException(ErrorCode.UNAUTHENTICATED);
+            }
+            else if(expiryTime.before(new Date())){
+                throw  new AppException(ErrorCode.TOKEN_EXPIRED);
             }
             return true;
         } catch (Exception e) {

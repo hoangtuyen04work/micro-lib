@@ -40,12 +40,14 @@ public class AuthController {
                 .data(tokenServiceImpl.login(request))
                 .build();
     }
+
     @PostMapping("/signup")
     public ApiResponse<AuthResponse> signup(@ModelAttribute UserCreationRequest request) throws AppException, JOSEException {
         return ApiResponse.<AuthResponse>builder()
                 .data(tokenServiceImpl.signup(request))
                 .build();
     }
+
     @PostMapping("/logoutt")
     public void logout(@RequestBody AuthRequest request){
         tokenServiceImpl.logout(request);

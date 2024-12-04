@@ -38,7 +38,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User emailVerify(String email, String password) throws AppException {
-        if(!isExistByEmail(email)) throw new AppException(ErrorCode.INVALID_INPUT);
+        if(!isExistByEmail(email)) throw new AppException(ErrorCode.USER_NOT_FOUND);
         User user = findByEmail(email);
         if(passwordEncoder.matches(password, user.getPassword()))
             return user;
@@ -48,7 +48,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User phoneVerify(String phone, String password) throws AppException {
-        if(!isExistByPhone(phone)) throw new AppException(ErrorCode.INVALID_INPUT);
+        if(!isExistByPhone(phone)) throw new AppException(ErrorCode.USER_NOT_FOUND);
         User user = findByPhone(phone);
         if(passwordEncoder.matches(password, user.getPassword()))
             return user;
@@ -85,7 +85,7 @@ public class UserServiceImpl implements UserService {
     public User createUser(UserCreationRequest request) throws AppException {
 
         if(request.getName() == null || userRepo.existsByName(request.getName()))
-            throw new AppException(ErrorCode.USER_ALREADY_EXISTS);
+            throw new AppException(ErrorCode.USER_ALREADY_EXISTED);
         if(request.getEmail() == null && request.getPhone() == null)
             throw new AppException(ErrorCode.INVALID_INPUT);
         else if(request.getEmail() != null && userRepo.existsByEmail(request.getEmail()))
