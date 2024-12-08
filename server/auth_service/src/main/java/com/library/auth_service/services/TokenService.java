@@ -31,6 +31,8 @@ public interface TokenService {
 
     Token createToken(User user) throws JOSEException;
 
+    Token createToken(User user, String refreshToken) throws JOSEException;
+
     String generateRefreshToken();
 
     String generateToken(User user) throws JOSEException;

@@ -12,6 +12,6 @@ import lombok.experimental.FieldDefaults;
 public class BookResponseSimple {
     Long id;
     String name;
-    String imageUrl;
+    String image;
     Long numberBorrowed;
 }

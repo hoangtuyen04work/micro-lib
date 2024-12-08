@@ -119,7 +119,7 @@ public class TokenServiceImpl implements TokenService {
         Token token = tokenRepo.findTokenByRefreshToken(refreshToken);
         if(token.getExpiry_refreshToken().isBefore(LocalDateTime.now())) throw  new AppException(ErrorCode.REFRESH_TOKEN_INVALID);
         tokenRepo.delete(token);
-        return createToken(userServiceImpl.findUserById(token.getUserid()));
+        return createToken(userServiceImpl.findUserById(token.getUserid()), refreshToken);
     }
 
     @Override
@@ -162,6 +162,26 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
+    public Token createToken(User user, String refreshToken) throws JOSEException {
+        LocalDateTime expiryToken = LocalDateTime.ofInstant(
+                Instant.now().plus(15 * 24 * 60 * 60, ChronoUnit.SECONDS),
+                ZoneId.systemDefault() // Sử dụng múi giờ hệ thống
+        );
+
+        LocalDateTime expiryRefreshToken = LocalDateTime.ofInstant(
+                Instant.now().plus(30 * 24 * 60 * 60, ChronoUnit.SECONDS),
+                ZoneId.systemDefault() // Sử dụng múi giờ hệ thống
+        );
+        return Token.builder()
+                .userid(user.getId())
+                .token(generateToken(user))
+                .refreshToken(generateRefreshToken())
+                .expiry_Token(expiryToken)
+                .expiry_refreshToken(expiryRefreshToken)
+                .build();
+    }
+
+    @Override
     public String generateRefreshToken(){
         return UUID.randomUUID().toString();
     }
@@ -174,7 +194,7 @@ public class TokenServiceImpl implements TokenService {
                 .subject(String.valueOf(user.getId()))
                 .issuer("LIBRARY")
                 .issueTime(new Date())
-                .expirationTime(Date.from(Instant.now().plus(40, ChronoUnit.SECONDS)))
+                .expirationTime(Date.from(Instant.now().plus(48*60*60, ChronoUnit.SECONDS)))
                 .jwtID(UUID.randomUUID().toString())
                 .claim("scope", roleScope)
                 .claim("roles", roleScope)
