@@ -21,5 +21,5 @@ public interface BorrowRepo extends JpaRepository<Borrow, Long> {
     Page<Long> findByUserId(Long userId, Pageable pageable);
     List<Borrow> findByUserIdAndBookId(Long userId, Long bookId);
     Boolean existsByUserIdAndBookId(Long userId, Long bookId);
-    Borrow findByUserIdAndBookIdAndStatus(Long userId, Long bookId, String status);
+    List<Borrow> findByUserIdAndBookIdAndStatus(Long userId, Long bookId, String status);
 }

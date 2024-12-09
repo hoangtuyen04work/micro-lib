@@ -57,9 +57,10 @@ public class BorrowServiceImpl implements BorrowService {
             throw new AppException(ErrorCode.BAD_REQUEST);
         }
         bookClient.returnBook(bookId, userId);
-        Borrow borrow  = borrowRepo.findByUserIdAndBookIdAndStatus(userId, bookId, "BORROWED");
-        borrow.setStatus("RETURNED");
-        borrowRepo.save(borrow);
+        List<Borrow> borrows  = borrowRepo.findByUserIdAndBookIdAndStatus(userId, bookId, "BORROWED");
+
+        borrows.getFirst().setStatus("RETURNED");
+        borrowRepo.saveAll(borrows);
         return true;
     }
 

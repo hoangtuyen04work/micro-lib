@@ -29,7 +29,7 @@ public class KafkaServiceImpl  implements KafkaService {
 
     @Override
     public void borrowNotify(Long bookId, Long userId, String bookName){
-        kafkaBorrow.send(returnTopic, BorrowNotificationRequest.builder()
+        kafkaBorrow.send(borrowTopic, BorrowNotificationRequest.builder()
                 .bookName(List.of(bookName))
                 .userId(userId)
                 .borrowTime(LocalDate.now())
