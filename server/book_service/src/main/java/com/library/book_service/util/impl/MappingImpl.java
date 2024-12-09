@@ -3,25 +3,62 @@ package com.library.book_service.util.impl;
 import com.library.book_service.dtos.requests.BookRequest;
 import com.library.book_service.dtos.requests.CategoryRequest;
 import com.library.book_service.dtos.requests.NewBookRequest;
-import com.library.book_service.dtos.responses.BookResponse;
-import com.library.book_service.dtos.responses.BookResponseSimple;
-import com.library.book_service.dtos.responses.CategoryResponse;
-import com.library.book_service.dtos.responses.PageResponse;
+import com.library.book_service.dtos.responses.*;
 import com.library.book_service.entities.Book;
 import com.library.book_service.entities.Category;
 import com.library.book_service.util.Mapping;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class MappingImpl implements Mapping {
 
     @Override
+    public void toBook(Book book, NewBookRequest updated, String image){
+        book.setBookCode(updated.getBookCode());
+        book.setCategories(toCategories(updated.getCategories()));
+        book.setAuthor(updated.getAuthor());
+        book.setEdition(updated.getEdition());
+        book.setNumberPage(updated.getNumberPage());
+        book.setName(updated.getName());
+        book.setNumber(updated.getNumber());
+        book.setPrice(updated.getPrice());
+        book.setPublicationDate(updated.getPublicationDate());
+        book.setShortDescription(updated.getShortDescription());
+        if(image != null){
+            book.setImage(image);
+        }
+    }
+
+    @Override
+    public PageResponse<BookSimpleResponse> toPagePageBookSimpleResponse(Page<Book> books){
+        return PageResponse.<BookSimpleResponse>builder()
+                .totalPages(books.getTotalPages())
+                .content(books.getContent().stream().map(this::toBookSimpleResponse).toList())
+                .pageSize(books.getSize())
+                .totalElements(books.getTotalElements())
+                .pageNumber(books.getNumber())
+                .build();
+    }
+
+    @Override
+    public BookSimpleResponse toBookSimpleResponse(Book request){
+        return BookSimpleResponse.builder()
+                .id(request.getId())
+                .price(request.getPrice())
+                .numberBorrowed(request.getNumberBorrowed())
+                .name(request.getName())
+                .author(request.getAuthor())
+                .language(request.getLanguage())
+                .build();
+    }
+
+    @Override
     public List<BookResponse> toBookResponses(List<Book> books){
-        return books.stream().map(this::toBookResponse).collect(Collectors.toList());
+        return books.stream().map(this::toBookResponse).toList();
     }
 
     @Override
@@ -65,7 +102,7 @@ public class MappingImpl implements Mapping {
     public BookResponseSimple toBookResponseSimple(Book request){
         return BookResponseSimple.builder()
                 .id(request.getId())
-                .imageUrl(request.getImageUrl())
+                .image(request.getImage())
                 .name(request.getName())
                 .numberBorrowed(request.getNumberBorrowed())
                 .build();
@@ -73,19 +110,7 @@ public class MappingImpl implements Mapping {
 
     @Override
     public BookResponse toBookResponse(Book book, NewBookRequest updated, String imageUrl){
-        book.setBookCode(updated.getBookCode());
-        book.setCategories(toCategories(updated.getCategories()));
-        book.setAuthor(updated.getAuthor());
-        book.setEdition(updated.getEdition());
-        book.setNumberPage(updated.getNumberPage());
-        book.setName(updated.getName());
-        book.setNumber(updated.getNumber());
-        book.setPrice(updated.getPrice());
-        book.setPublicationDate(updated.getPublicationDate());
-        book.setShortDescription(updated.getShortDescription());
-        if(imageUrl != null){
-            book.setImageUrl(imageUrl);
-        }
+        toBook(book, updated, imageUrl);
         return toBookResponse(book);
     }
 
@@ -120,7 +145,7 @@ public class MappingImpl implements Mapping {
                 .author(request.getAuthor())
                 .categories(toCategoryResponses(request.getCategories()))
                 .price(request.getPrice())
-                .imageUrl(request.getImageUrl())
+                .image(request.getImage() == null ? null : request.getImage())
                 .language(request.getLanguage())
                 .shortDescription(request.getShortDescription())
                 .numberPage(request.getNumberPage())
@@ -138,7 +163,7 @@ public class MappingImpl implements Mapping {
                 .author(request.getAuthor())
                 .number(request.getNumber())
                 .categories(toCategories(request.getCategories()))
-                .imageUrl(request.getImageUrl())
+                .image(request.getImage())
                 .price(request.getPrice())
                 .language(request.getLanguage())
                 .shortDescription(request.getShortDescription())
@@ -153,7 +178,7 @@ public class MappingImpl implements Mapping {
     public List<CategoryResponse> toCategoryResponses(List<Category> categories) {
         return categories.stream()
                 .map(this::toCategoryResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -165,11 +190,14 @@ public class MappingImpl implements Mapping {
     }
 
     @Override
-    public List<Category> toCategories(List<CategoryRequest> request){
-        return request.stream()
-                .map(this::toCategory)
-                .collect(Collectors.toList());
+    public List<Category> toCategories(List<CategoryRequest> request) {
+        return new ArrayList<>(
+                request.stream()
+                        .map(this::toCategory)
+                        .toList() // This returns an immutable list.
+        );
     }
+
 
     @Override
     public Category toCategory(CategoryRequest request){

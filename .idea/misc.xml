@@ -23,6 +23,7 @@
     <option name="ignoredFiles">
       <set>
         <option value="$PROJECT_DIR$/server/comment_service/pom.xml" />
+        <option value="$PROJECT_DIR$/server/message_service/pom.xml" />
       </set>
     </option>
   </component>

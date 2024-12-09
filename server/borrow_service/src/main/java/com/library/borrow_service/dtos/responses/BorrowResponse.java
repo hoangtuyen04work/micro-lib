@@ -4,6 +4,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -15,7 +16,7 @@ public class BorrowResponse {
     Long id;
     Long bookId;
     Long userId;
-    LocalDate borrowDate;
-    LocalDate returnDate;
+    LocalDateTime borrowDate;
+    LocalDateTime returnDate;
     String status;
 }

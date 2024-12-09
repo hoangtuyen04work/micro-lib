@@ -30,7 +30,8 @@ public class Book {
     Long price;
     String author;
     Long number;
-    String imageUrl;
+    @Lob
+    String image;
     String language;
     @ManyToMany()
     @JoinTable(

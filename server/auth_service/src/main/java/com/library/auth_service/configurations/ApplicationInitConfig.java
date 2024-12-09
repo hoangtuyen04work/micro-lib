@@ -2,7 +2,6 @@ package com.library.auth_service.configurations;
 
 import com.library.auth_service.entities.Role;
 import com.library.auth_service.entities.User;
-import com.library.auth_service.exceptions.AppException;
 import com.library.auth_service.repositories.RoleRepo;
 import com.library.auth_service.repositories.UserRepo;
 import lombok.AccessLevel;
@@ -40,11 +39,11 @@ public class ApplicationInitConfig {
                 roleRepo.save(user);
                 roles.add(user);
             }
-            if(!userRepo.existsByEmail("ADMIN")){
+            if(!userRepo.existsByEmail("ADMIN@gmail.com")){
                 User user = User.builder()
                         .roles(roles)
                         .name("ADMIN")
-                        .email("ADMIN")
+                        .email("ADMIN@gmail.com")
                         .password(passwordEncoder.encode("123"))
                         .phone("ADMIN")
                         .build();

@@ -33,6 +33,7 @@ public class RatingServiceImpl implements RatingService {
             Rating rating = rate.get();
             rating.setRating(request.getRating());
             rating.setComment(request.getComment());
+            rating.setUserName(request.getUserName());
             return toRatingResponse(ratingRepo.save(rating));
         }
         Rating rating = Rating.builder()

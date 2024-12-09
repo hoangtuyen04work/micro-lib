@@ -1,9 +1,7 @@
 package com.library.auth_service.controllers;
 
 import com.library.auth_service.dtos.ApiResponse;
-import com.library.auth_service.dtos.requests.AuthRequest;
-import com.library.auth_service.dtos.requests.TokenRequest;
-import com.library.auth_service.dtos.requests.UserRequest;
+import com.library.auth_service.dtos.requests.*;
 import com.library.auth_service.dtos.responses.AuthResponse;
 import com.library.auth_service.dtos.responses.BooleanResponse;
 import com.library.auth_service.exceptions.AppException;
@@ -20,6 +18,15 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     TokenServiceImpl tokenServiceImpl;
 
+
+    @PostMapping("/refreshToken")
+    public ApiResponse<AuthResponse> refreshToken(@RequestBody RefreshTokenRequest request) throws AppException, JOSEException {
+        System.err.println(request);
+        return ApiResponse.<AuthResponse>builder()
+                .data(tokenServiceImpl.refreshTokenOk(request))
+                .build();
+    }
+
     @PostMapping("/authenticate")
     public ApiResponse<BooleanResponse> authenticate(@RequestBody AuthRequest authRequest) throws AppException {
         return ApiResponse.<BooleanResponse>builder()
@@ -33,14 +40,16 @@ public class AuthController {
                 .data(tokenServiceImpl.login(request))
                 .build();
     }
+
     @PostMapping("/signup")
-    public ApiResponse<AuthResponse> signup(@ModelAttribute UserRequest request) throws AppException, JOSEException {
+    public ApiResponse<AuthResponse> signup(@ModelAttribute UserCreationRequest request) throws AppException, JOSEException {
         return ApiResponse.<AuthResponse>builder()
                 .data(tokenServiceImpl.signup(request))
                 .build();
     }
+
     @PostMapping("/logoutt")
-    public void logout(@RequestBody TokenRequest request){
+    public void logout(@RequestBody AuthRequest request){
         tokenServiceImpl.logout(request);
     }
 }

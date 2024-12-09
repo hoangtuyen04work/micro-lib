@@ -4,6 +4,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -16,7 +17,7 @@ public class BorrowRequest {
     Long id;
     Long bookId;
     Long userId;
-    LocalDate borrowDate;
-    LocalDate returnDate;
+    LocalDateTime borrowDate;
+    LocalDateTime returnDate;
     String status;
 }

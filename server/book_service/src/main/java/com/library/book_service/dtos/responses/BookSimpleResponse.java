@@ -4,7 +4,6 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 
 @Getter
@@ -13,19 +12,12 @@ import java.util.List;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
-public class BookResponse {
-    Long number;
-    Long id;
-    String bookCode;
-    String name;
+public class BookSimpleResponse {
     Long numberBorrowed;
-    LocalDate publicationDate;
-    String edition;
-    Long numberPage;
-    String shortDescription;
+    Long id;
+    String name;
     Long price;
     String author;
-    String image;
     String language;
-    List<CategoryResponse> categories;
 }
+

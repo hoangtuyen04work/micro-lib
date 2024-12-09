@@ -1,6 +1,7 @@
 package com.library.book_service.services.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.library.book_service.dtos.responses.BookSimpleResponse;
 import com.library.book_service.repositories.httpclient.BorrowClient;
 import com.library.book_service.services.KafkaService;
 import com.library.book_service.dtos.requests.NewBookRequest;
@@ -25,6 +26,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +43,13 @@ public class BookServiceImpl implements BookService{
     BookRedisService bookRedisService;
     KafkaService kafkaService;
     BorrowClient borrowClient;
+
+    @Override
+    public PageResponse<BookSimpleResponse> getBookSimpleResponse(Integer page, Integer size){
+        Pageable pageable = PageRequest.of(page, size, Sort.by("numberBorrowed").descending());
+        Page<Book> books = bookRepo.findAll(pageable);
+        return mapping.toPagePageBookSimpleResponse(books);
+    }
 
     @Override
     public PageResponse<BookResponse> getTopBorrow(Integer page, Integer size){
@@ -196,11 +205,16 @@ public class BookServiceImpl implements BookService{
     @Override
     public BookResponse updateBook(Long id, NewBookRequest updated) throws AppException {
         Optional<Book> optionalBook = bookRepo.findById(id);
-        String imageUrl = null;
-        if(updated.getImage() != null){
-            imageUrl = amazonS3Client.uploadImage(updated.getImage());
+        String image = null;
+        if (updated.getImage() instanceof MultipartFile) {
+            MultipartFile file = (MultipartFile) updated.getImage();
+            image = amazonS3Client.uploadImage(file); // Hàm upload ảnh trả về URL
+        } else if (updated.getImage() instanceof String) {
+            image = (String) updated.getImage();
         }
-        return mapping.toBookResponse(bookRepo.save(checkOptional(optionalBook)), updated, imageUrl);
+        Book book = checkOptional(optionalBook);
+        mapping.toBook(book, updated, image);
+        return mapping.toBookResponse(bookRepo.save(book), updated, image);
     }
 
     @Override
@@ -211,9 +225,16 @@ public class BookServiceImpl implements BookService{
     //CreateBook
     @Override
     public BookResponse createBook(NewBookRequest request){
+        String image = null;
+        if (request.getImage() instanceof MultipartFile) {
+            MultipartFile file = (MultipartFile) request.getImage();
+            image = amazonS3Client.uploadImage(file); // Hàm upload ảnh trả về URL
+        } else if (request.getImage() instanceof String) {
+            image = (String) request.getImage();
+        }
         Book book = mapping.toBook(request);
         book.setCategories(categoryService.findByIds(request.getCategories()));
-        book.setImageUrl(amazonS3Client.uploadImage(request.getImage()));
+        book.setImage(image);
         book.setNumberBorrowed(0L);
         return mapping.toBookResponse(bookRepo.save(book));
     }

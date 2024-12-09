@@ -26,11 +26,13 @@ public class User {
     @Column(nullable = false)
     String password;
     String email;
+    Long numberBorrowed;
+    Long numberReturned;
     String phone;
     @CreatedDate
-    Date created_ad;
+    Date createdAt;
     @LastModifiedDate
-    Date update_at;
+    Date updateAt;
     @ManyToMany
     @JoinTable(
             name = "user_roles", // Join table name

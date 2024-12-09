@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class GlobalException {
     @ExceptionHandler(value = AccessDeniedException.class)
     ResponseEntity<ApiResponse> handleAccessDeniedException(final AccessDeniedException e){
-        ErrorCode errorCode = ErrorCode.ACCESSDENIED;
+        ErrorCode errorCode = ErrorCode.ACCESS_DENIED;
         return ResponseEntity.status(errorCode.getHttpStatus())
                 .body(ApiResponse.builder()
                         .code(errorCode.getCode())
