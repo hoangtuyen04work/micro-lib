@@ -77,8 +77,8 @@ public class BookController {
     }
 
     @PostMapping("/borrows/{userId}")
-    public ApiResponse<Boolean> borrow(@RequestBody List<Long> id, @PathVariable Long userId) throws AppException {
-        bookService.borrow(id, userId);
+    public ApiResponse<Boolean> borrow(@RequestBody List<Long> ids, @PathVariable Long userId) throws AppException {
+        bookService.borrow(ids, userId);
         return ApiResponse.<Boolean>builder()
                 .data(true)
                 .build();

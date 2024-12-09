@@ -3,6 +3,8 @@ package com.library.borrow_service.services.impl;
 import com.library.borrow_service.dtos.responses.BorrowResponse;
 import com.library.borrow_service.dtos.responses.PageResponse;
 import com.library.borrow_service.entities.Borrow;
+import com.library.borrow_service.exceptions.AppException;
+import com.library.borrow_service.exceptions.ErrorCode;
 import com.library.borrow_service.mapping.Mapping;
 import com.library.borrow_service.repositories.BorrowRepo;
 import com.library.borrow_service.repositories.httpclients.BookClient;
@@ -50,9 +52,12 @@ public class BorrowServiceImpl implements BorrowService {
 
     //return a book of a user
     @Override
-    public boolean returnBook(Long bookId, Long userId) {
+    public boolean returnBook(Long bookId, Long userId) throws AppException {
+        if(!borrowRepo.existsByUserIdAndBookIdAndStatus(userId, bookId, "BORROWED")){
+            throw new AppException(ErrorCode.BAD_REQUEST);
+        }
         bookClient.returnBook(bookId, userId);
-        Borrow borrow = borrowRepo.findByUserIdAndBookId(userId, bookId);
+        Borrow borrow  = borrowRepo.findByUserIdAndBookIdAndStatus(userId, bookId, "BORROWED");
         borrow.setStatus("RETURNED");
         borrowRepo.save(borrow);
         return true;
@@ -70,7 +75,10 @@ public class BorrowServiceImpl implements BorrowService {
     }
 
     @Override
-    public boolean borrowBook(Long bookId, Long userId) {
+    public boolean borrowBook(Long bookId, Long userId) throws AppException {
+        if(borrowRepo.existsByUserIdAndBookIdAndStatus(userId, bookId, "BORROWED")){
+            throw new AppException(ErrorCode.BAD_REQUEST);
+        }
         bookClient.borrow(bookId, userId);
         borrowRepo.save(mapping.toBorrow(bookId, userId));
         return true;

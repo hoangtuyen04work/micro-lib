@@ -19,5 +19,7 @@ public interface BorrowRepo extends JpaRepository<Borrow, Long> {
     Page<Long> getAllBookId(Pageable pageable);
     Page<Borrow> findAll(Pageable pageable);
     Page<Long> findByUserId(Long userId, Pageable pageable);
-    Borrow findByUserIdAndBookId(Long userId, Long bookId);
+    List<Borrow> findByUserIdAndBookId(Long userId, Long bookId);
+    Boolean existsByUserIdAndBookId(Long userId, Long bookId);
+    Borrow findByUserIdAndBookIdAndStatus(Long userId, Long bookId, String status);
 }

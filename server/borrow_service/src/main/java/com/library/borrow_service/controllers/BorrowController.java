@@ -3,6 +3,7 @@ package com.library.borrow_service.controllers;
 import com.library.borrow_service.dtos.ApiResponse;
 import com.library.borrow_service.dtos.responses.BorrowResponse;
 import com.library.borrow_service.dtos.responses.PageResponse;
+import com.library.borrow_service.exceptions.AppException;
 import com.library.borrow_service.services.BorrowService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -51,7 +52,7 @@ public class BorrowController {
     }
 
     @PutMapping("/borrow/{userId}/{bookId}")
-    public ApiResponse<Boolean> borrowBook(@PathVariable Long userId, @PathVariable Long bookId) {
+    public ApiResponse<Boolean> borrowBook(@PathVariable Long userId, @PathVariable Long bookId) throws AppException {
         return ApiResponse.<Boolean>builder()
                 .data(borrowService.borrowBook(bookId, userId))
                 .build();
@@ -59,7 +60,7 @@ public class BorrowController {
 
     //return a book borrowed by userId
     @PutMapping("/return/{userId}/{bookId}")
-    public ApiResponse<Boolean> returnBook(@PathVariable Long userId, @PathVariable Long bookId) {
+    public ApiResponse<Boolean> returnBook(@PathVariable Long userId, @PathVariable Long bookId) throws AppException {
         return ApiResponse.<Boolean>builder()
                 .data(borrowService.returnBook(bookId, userId))
                 .build();
