@@ -1,8 +1,11 @@
 package com.library.auth_service.repositories.httpclient;
 
 import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,7 +16,6 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
 
-@RequiredArgsConstructor
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AmazonS3Client {
@@ -21,7 +23,8 @@ public class AmazonS3Client {
     String bucket;
     @Value("${amazon.region}")
     String region;
-    final S3Client s3Client;
+    @Autowired
+    S3Client s3Client;
 
     public String uploadImage(MultipartFile file){
         String key = file.getOriginalFilename();

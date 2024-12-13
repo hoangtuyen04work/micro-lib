@@ -82,6 +82,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public PageResponse<UserSimpleResponse> findUsersById(Integer userId, Integer page, Integer size) {
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<User> pages = userRepo.findById(userId, pageRequest);
+        return mapping.toPageUserSimpleResponse(pages);
+    }
+
+    @Override
+    public PageResponse<UserSimpleResponse> findUsersByName(String name, Integer page, Integer size) {
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<User> pages = userRepo.findByName(name, pageRequest);
+        return mapping.toPageUserSimpleResponse(pages);
+    }
+
+    @Override
     public User createUser(UserCreationRequest request) throws AppException {
 
         if(request.getName() == null || userRepo.existsByName(request.getName()))

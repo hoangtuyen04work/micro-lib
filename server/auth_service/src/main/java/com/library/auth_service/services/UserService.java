@@ -23,5 +23,9 @@ public interface UserService {
 
     User findUserById(Long id);
 
+    PageResponse<UserSimpleResponse> findUsersById(Integer userId, Integer page, Integer size);
+
+    PageResponse<UserSimpleResponse> findUsersByName(String name, Integer page, Integer size);
+
     User createUser(UserCreationRequest request) throws AppException;
 }
